@@ -823,8 +823,22 @@
       const real = getResultScore(index, APP_STATE.results);
       if (real) return real;
       const override = overrides[String(index)];
-      if (override && Array.isArray(override.score)) return override.score;
-      return mostCommonPrediction(PRODE_DATA.matches[index]);
+      const score = override && Array.isArray(override.score) ? override.score.map(Number) : null;
+      if (score && score.length === 2 && score.every(Number.isFinite)) return score;
+      return null;
+    }
+
+    function getSimInputValues(index, overrides = APP_STATE.simulatedOverrides) {
+      const real = getResultScore(index, APP_STATE.results);
+      if (real) return real;
+      const override = overrides[String(index)];
+      if (!override || !Array.isArray(override.score)) return ['', ''];
+      return [0, 1].map(side => {
+        const value = override.score[side];
+        if (value === '' || value === null || value === undefined) return '';
+        const number = Number(value);
+        return Number.isFinite(number) ? number : '';
+      });
     }
 
     function mostCommonPrediction(match) {
@@ -1078,7 +1092,7 @@
         <section class="sim-layout">
           <article class="card pad">
             <div class="section-title">
-              <div><h2>Simulador</h2><p>Los pendientes arrancan con el pronóstico más repetido. Cambiá goles y mirá cómo se mueve la tabla.</p></div>
+              <div><h2>Simulador</h2><p>Los pendientes arrancan vacíos y no suman en el ranking proyectado hasta que cargues los dos goles.</p></div>
               <div class="header-actions"><button class="btn ghost" id="clearSim" type="button">Limpiar simulación</button><button class="btn" id="realSim" type="button">Aplicar resultados reales</button></div>
             </div>
             ${remaining.length ? `<div class="sim-grid">${remaining.map(item => renderSimCard(item.match, item.index)).join('')}</div>` : '<div class="empty"><strong>Todos los partidos de grupos tienen resultado.</strong><p>No quedan escenarios para simular en esta fase.</p></div>'}
@@ -1091,19 +1105,19 @@
         </section>`;
       $$('.sim-score', app).forEach(input => input.addEventListener('input', handleSimInput));
       $('#clearSim')?.addEventListener('click', () => { APP_STATE.simulatedOverrides = {}; showToast('Simulación reseteada'); renderSimulador(); });
-      $('#realSim')?.addEventListener('click', () => { APP_STATE.simulatedOverrides = {}; showToast('Resultados reales aplicados a la base de la simulación'); renderSimulador(); });
+      $('#realSim')?.addEventListener('click', () => { APP_STATE.simulatedOverrides = {}; showToast('Solo quedan resultados reales: los pendientes no computan'); renderSimulador(); });
     }
 
     function renderSimCard(match, index) {
-      const score = getSimulatedScore(index);
-      const mode = mostCommonPrediction(match);
+      const score = getSimInputValues(index);
+      const complete = Array.isArray(getSimulatedScore(index, APP_STATE.simulatedOverrides));
       return `
-        <div class="sim-card">
-          <div class="match-meta">${match.group} · más repetido: ${mode.join('-')}</div>
+        <div class="sim-card ${complete ? 'complete' : 'pending'}">
+          <div class="match-meta">${match.group} · ${complete ? 'simulado y computado' : 'pendiente: no computa'}</div>
           <div class="sim-teams"><div class="team right">${prettyTeam(match.team1)}</div><span class="score-pill">vs</span><div class="team">${prettyTeam(match.team2)}</div></div>
           <div class="sim-inputs">
-            <label>${prettyTeam(match.team1)}<input class="sim-score" data-index="${index}" data-side="0" type="number" min="0" max="20" value="${score[0]}"></label>
-            <label>${prettyTeam(match.team2)}<input class="sim-score" data-index="${index}" data-side="1" type="number" min="0" max="20" value="${score[1]}"></label>
+            <label>${prettyTeam(match.team1)}<input class="sim-score" data-index="${index}" data-side="0" type="number" min="0" max="20" inputmode="numeric" placeholder="—" value="${score[0]}"></label>
+            <label>${prettyTeam(match.team2)}<input class="sim-score" data-index="${index}" data-side="1" type="number" min="0" max="20" inputmode="numeric" placeholder="—" value="${score[1]}"></label>
           </div>
         </div>`;
     }
@@ -1111,10 +1125,13 @@
     function handleSimInput(event) {
       const index = event.target.dataset.index;
       const side = Number(event.target.dataset.side);
-      const current = getSimulatedScore(Number(index));
-      const value = clampScore(event.target.value);
-      current[side] = value;
-      APP_STATE.simulatedOverrides[index] = { score: current, simulated: true };
+      const current = getSimInputValues(Number(index));
+      current[side] = event.target.value === '' ? '' : clampScore(event.target.value);
+      if (current[0] === '' && current[1] === '') {
+        delete APP_STATE.simulatedOverrides[index];
+      } else {
+        APP_STATE.simulatedOverrides[index] = { score: current, simulated: true };
+      }
       renderSimulador();
     }
 
