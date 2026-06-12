@@ -584,7 +584,7 @@
       'Haiti': 'Haiti',
       'Escocia': 'Scotland',
       'Canada': 'Canada',
-      'Bosnia': 'Bosnia and Herzegovina',
+      'Bosnia': 'Bosnia-Herzegovina',
       'Suiza': 'Switzerland',
       'Iran': 'Iran',
       'Senegal': 'Senegal',
@@ -593,7 +593,7 @@
 
     const RESULT_CACHE_KEY = 'prode_wc2026_results';
     const PRIZE_CACHE_KEY = 'prode_wc2026_prize_pool';
-    const CACHE_MAX_AGE = 5 * 60 * 1000;
+    const CACHE_MAX_AGE = 60 * 1000;
     const API_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=';
     const SCORE_TIERS = [10, 8, 7, 6, 5, 2, 1, 0];
     const GROUP_DATES = makeDateRange('2026-06-11', '2026-06-28');
@@ -792,7 +792,9 @@
         .replace(/[̀-ͯ]/g, '')
         .replace(/&/g, 'and')
         .replace(/[^a-zA-Z0-9]+/g, ' ')
+        .replace(/\b(and|y|e)\b/gi, ' ')
         .trim()
+        .replace(/\s+/g, ' ')
         .toLowerCase();
     }
 
