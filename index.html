@@ -366,6 +366,8 @@
     .empty p { color: var(--text-muted); margin: 0; }
 
     .sim-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, 440px); gap: 16px; align-items: start; }
+    .sim-groups { display: grid; gap: 14px; }
+    .sim-group-content { display: block; }
     .sim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
     .sim-card { padding: 14px; border: 1px solid rgba(42,53,80,.75); border-radius: 16px; background: rgba(19,25,41,.66); }
     .sim-teams { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-bottom: 12px; }
@@ -705,6 +707,7 @@
       loading: false,
       selectedParticipant: null,
       expandedGroups: new Set(PRODE_DATA.matches.map(m => m.group)),
+      expandedSimGroups: new Set(PRODE_DATA.matches.map(m => m.group)),
       expandedMatches: new Set(),
       filters: { status: 'all', group: 'all' },
       curioDate: null,
@@ -1577,17 +1580,19 @@
 
     function renderSimulador() {
       const remaining = PRODE_DATA.matches.map((match, index) => ({ match, index })).filter(item => !isPlayed(item.index));
+      const grouped = groupSimulationMatches(remaining);
       const current = computeLeaderboard(APP_STATE.results);
       const simulated = computeLeaderboard(APP_STATE.simulatedOverrides, { useSimulationDefaults: true });
       const currentByName = Object.fromEntries(current.map(r => [r.name, r]));
+      const simulatedCount = remaining.filter(item => Array.isArray(getSimulatedScore(item.index, APP_STATE.simulatedOverrides))).length;
       app.innerHTML = `
         <section class="sim-layout">
           <article class="card pad">
             <div class="section-title">
-              <div><h2>Simulador</h2><p>Los pendientes arrancan vacíos y no suman en el ranking proyectado hasta que cargues los dos goles.</p></div>
-              <div class="header-actions"><button class="btn ghost" id="clearSim" type="button">Limpiar simulación</button><button class="btn" id="realSim" type="button">Aplicar resultados reales</button></div>
+              <div><h2>Simulador</h2><p>Los pendientes están agrupados por grupo. Abrí un grupo, cargá resultados y el ranking proyectado se recalcula al instante.</p></div>
+              <div class="header-actions"><button class="btn ghost" id="collapseSimGroups" type="button">Colapsar grupos</button><button class="btn ghost" id="clearSim" type="button">Limpiar simulación</button><button class="btn" id="realSim" type="button">Aplicar resultados reales</button></div>
             </div>
-            ${remaining.length ? `<div class="sim-grid">${remaining.map(item => renderSimCard(item.match, item.index)).join('')}</div>` : '<div class="empty"><strong>Todos los partidos de grupos tienen resultado.</strong><p>No quedan escenarios para simular en esta fase.</p></div>'}
+            ${remaining.length ? `<div class="mini-note">${simulatedCount}/${remaining.length} partidos simulados y computados.</div><div class="sim-groups">${Array.from(grouped.entries()).map(([group, items]) => renderSimGroupBlock(group, items)).join('')}</div>` : '<div class="empty"><strong>Todos los partidos de grupos tienen resultado.</strong><p>No quedan escenarios para simular en esta fase.</p></div>'}
           </article>
           <aside class="card pad sticky-side">
             <div class="section-title"><div><h3>Ranking proyectado</h3><p>Actual vs simulado</p></div></div>
@@ -1596,8 +1601,47 @@
           </aside>
         </section>`;
       $$('.sim-score', app).forEach(input => input.addEventListener('input', handleSimInput));
+      $$('.sim-group-toggle', app).forEach(btn => btn.addEventListener('click', () => {
+        const group = btn.dataset.simGroup;
+        if (APP_STATE.expandedSimGroups.has(group)) APP_STATE.expandedSimGroups.delete(group); else APP_STATE.expandedSimGroups.add(group);
+        renderSimulador();
+      }));
+      $('#collapseSimGroups')?.addEventListener('click', () => {
+        if (APP_STATE.expandedSimGroups.size) {
+          APP_STATE.expandedSimGroups = new Set();
+          showToast('Grupos del simulador colapsados');
+        } else {
+          APP_STATE.expandedSimGroups = new Set(PRODE_DATA.matches.map(m => m.group));
+          showToast('Grupos del simulador desplegados');
+        }
+        renderSimulador();
+      });
       $('#clearSim')?.addEventListener('click', () => { APP_STATE.simulatedOverrides = {}; showToast('Simulación reseteada'); renderSimulador(); });
       $('#realSim')?.addEventListener('click', () => { APP_STATE.simulatedOverrides = {}; showToast('Solo quedan resultados reales: los pendientes no computan'); renderSimulador(); });
+    }
+
+    function groupSimulationMatches(items) {
+      const grouped = new Map();
+      items.forEach(item => {
+        if (!grouped.has(item.match.group)) grouped.set(item.match.group, []);
+        grouped.get(item.match.group).push(item);
+      });
+      return grouped;
+    }
+
+    function renderSimGroupBlock(group, items) {
+      if (!items.length) return '';
+      const collapsed = !APP_STATE.expandedSimGroups.has(group);
+      const simulated = items.filter(item => Array.isArray(getSimulatedScore(item.index, APP_STATE.simulatedOverrides))).length;
+      const teams = Array.from(new Set(PRODE_DATA.matches.filter(m => m.group === group).flatMap(m => [m.team1, m.team2]))).map(prettyTeam).join(' · ');
+      return `
+        <section class="group-block sim-group ${collapsed ? 'collapsed' : ''}">
+          <button class="group-header sim-group-toggle" type="button" data-sim-group="${group}">
+            <div><strong>${group.toUpperCase()}</strong><br><span>${teams}</span></div>
+            <span>${simulated}/${items.length} simulados <span class="chev">⌄</span></span>
+          </button>
+          <div class="group-content sim-group-content"><div class="sim-grid">${items.map(item => renderSimCard(item.match, item.index)).join('')}</div></div>
+        </section>`;
     }
 
     function renderSimCard(match, index) {
