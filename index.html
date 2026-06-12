@@ -250,7 +250,9 @@
     .score-pill { min-width: 56px; color: white; font-weight: 950; font-size: 1.03rem; }
     .status { font-size: .76rem; font-weight: 900; letter-spacing: .04em; }
     .status.pre { color: var(--text-muted); }
-    .status.live { color: white; border-color: rgba(255, 77, 109, .5); background: rgba(255, 77, 109, .15); }
+    .status.live { color: white; border-color: rgba(255, 77, 109, .62); background: rgba(255, 77, 109, .18); box-shadow: 0 0 18px rgba(255, 77, 109, .14); gap: 6px; }
+    .status.live::before { content: ''; width: 7px; height: 7px; border-radius: 999px; background: #ff4d6d; box-shadow: 0 0 0 0 rgba(255,77,109,.72); animation: livePulse 1.25s infinite; }
+    @keyframes livePulse { 0% { box-shadow: 0 0 0 0 rgba(255,77,109,.72); } 70% { box-shadow: 0 0 0 7px rgba(255,77,109,0); } 100% { box-shadow: 0 0 0 0 rgba(255,77,109,0); } }
     .status.final { color: #b8ffd0; border-color: rgba(34, 197, 94, .5); background: rgba(34, 197, 94, .13); }
 
     .prize-card { margin-top: 16px; }
@@ -280,9 +282,11 @@
     .money-box strong { display: block; font-size: 1.3rem; margin-top: 4px; }
 
     .match-card { border: 1px solid rgba(42,53,80,.82); background: linear-gradient(180deg, rgba(18,29,49,.86), rgba(12,19,34,.80)); border-radius: 18px; overflow: hidden; }
+    .match-card.live-match { border-color: rgba(255,77,109,.72); box-shadow: 0 0 0 1px rgba(255,77,109,.18), 0 14px 40px rgba(255,77,109,.10); }
+    .match-card.live-match .score-pill { border-color: rgba(255,77,109,.72); background: rgba(255,77,109,.16); }
     .match-head {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto auto;
       align-items: center;
       gap: 12px;
       padding: 14px;
@@ -553,10 +557,10 @@
 
     const TEAM_MAP = {
       'Sudafrica': 'South Africa',
-      'Republica Checa': 'Czechia',
+      'Republica Checa': 'Czech Republic',
       'Corea del Sur': 'South Korea',
       'Estados Unidos': 'United States',
-      'Turquia': 'Turkey',
+      'Turquia': 'Türkiye',
       'Alemania': 'Germany',
       'Costa de Marfil': "Côte d'Ivoire",
       'Curazao': 'Curaçao',
@@ -569,13 +573,13 @@
       'Nueva Zelanda': 'New Zealand',
       'España': 'Spain',
       'Arabia Saudita': 'Saudi Arabia',
-      'Cabo Verde': 'Cape Verde',
+      'Cabo Verde': 'Cabo Verde',
       'Francia': 'France',
       'Irak': 'Iraq',
       'Noruega': 'Norway',
       'Argelia': 'Algeria',
       'Jordania': 'Jordan',
-      'Congo': 'Congo',
+      'Congo': 'DR Congo',
       'Uzbekistan': 'Uzbekistan',
       'Inglaterra': 'England',
       'Croacia': 'Croatia',
@@ -584,14 +588,77 @@
       'Haiti': 'Haiti',
       'Escocia': 'Scotland',
       'Canada': 'Canada',
-      'Bosnia': 'Bosnia-Herzegovina',
+      'Bosnia': 'Bosnia and Herzegovina',
       'Suiza': 'Switzerland',
       'Iran': 'Iran',
       'Senegal': 'Senegal',
-      'Panama': 'Panama'
+      'Panama': 'Panama',
+      'Mexico': 'Mexico',
+      'Argentina': 'Argentina',
+      'Australia': 'Australia',
+      'Austria': 'Austria',
+      'Colombia': 'Colombia',
+      'Ecuador': 'Ecuador',
+      'Ghana': 'Ghana',
+      'Paraguay': 'Paraguay',
+      'Portugal': 'Portugal',
+      'Qatar': 'Qatar',
+      'Uruguay': 'Uruguay'
     };
 
-    const RESULT_CACHE_KEY = 'prode_wc2026_results';
+    const TEAM_ALIASES = {
+      'MEX': 'Mexico', 'Mexico': 'Mexico', 'México': 'Mexico',
+      'South Africa': 'South Africa', 'Sudafrica': 'South Africa', 'Sudáfrica': 'South Africa', 'RSA': 'South Africa',
+      'South Korea': 'South Korea', 'Corea del Sur': 'South Korea', 'Korea Republic': 'South Korea', 'Republic of Korea': 'South Korea', 'Korea Rep': 'South Korea', 'KOR': 'South Korea',
+      'Czech Republic': 'Czech Republic', 'Czechia': 'Czech Republic', 'Republica Checa': 'Czech Republic', 'República Checa': 'Czech Republic', 'CZE': 'Czech Republic',
+      'Canada': 'Canada', 'Canadá': 'Canada', 'CAN': 'Canada',
+      'Bosnia': 'Bosnia and Herzegovina', 'Bosnia and Herzegovina': 'Bosnia and Herzegovina', 'Bosnia-Herzegovina': 'Bosnia and Herzegovina', 'Bosnia & Herzegovina': 'Bosnia and Herzegovina', 'Bosnia y Herzegovina': 'Bosnia and Herzegovina', 'Bosnia-Herz.': 'Bosnia and Herzegovina', 'BIH': 'Bosnia and Herzegovina',
+      'Qatar': 'Qatar', 'QAT': 'Qatar',
+      'Switzerland': 'Switzerland', 'Suiza': 'Switzerland', 'SUI': 'Switzerland',
+      'Brazil': 'Brazil', 'Brasil': 'Brazil', 'BRA': 'Brazil',
+      'Morocco': 'Morocco', 'Marruecos': 'Morocco', 'MAR': 'Morocco',
+      'Haiti': 'Haiti', 'Haití': 'Haiti', 'HAI': 'Haiti',
+      'Scotland': 'Scotland', 'Escocia': 'Scotland', 'SCO': 'Scotland',
+      'United States': 'United States', 'Estados Unidos': 'United States', 'USA': 'United States', 'USMNT': 'United States', 'United States of America': 'United States', 'U.S.': 'United States', 'U.S.A.': 'United States',
+      'Paraguay': 'Paraguay', 'PAR': 'Paraguay',
+      'Australia': 'Australia', 'AUS': 'Australia',
+      'Turkey': 'Türkiye', 'Türkiye': 'Türkiye', 'Turkiye': 'Türkiye', 'Turquia': 'Türkiye', 'Turquía': 'Türkiye', 'TUR': 'Türkiye',
+      'Germany': 'Germany', 'Alemania': 'Germany', 'GER': 'Germany',
+      'Curaçao': 'Curaçao', 'Curacao': 'Curaçao', 'Curazao': 'Curaçao', 'CUW': 'Curaçao',
+      'Ivory Coast': 'Ivory Coast', "Côte d'Ivoire": 'Ivory Coast', 'Cote d Ivoire': 'Ivory Coast', 'Cote dIvoire': 'Ivory Coast', 'Costa de Marfil': 'Ivory Coast', 'CIV': 'Ivory Coast',
+      'Ecuador': 'Ecuador', 'ECU': 'Ecuador',
+      'Netherlands': 'Netherlands', 'Holanda': 'Netherlands', 'Holland': 'Netherlands', 'NED': 'Netherlands',
+      'Japan': 'Japan', 'Japon': 'Japan', 'Japón': 'Japan', 'JPN': 'Japan',
+      'Sweden': 'Sweden', 'Suecia': 'Sweden', 'SWE': 'Sweden',
+      'Tunisia': 'Tunisia', 'Tunez': 'Tunisia', 'Túnez': 'Tunisia', 'TUN': 'Tunisia',
+      'Belgium': 'Belgium', 'Belgica': 'Belgium', 'Bélgica': 'Belgium', 'BEL': 'Belgium',
+      'Egypt': 'Egypt', 'Egipto': 'Egypt', 'EGY': 'Egypt',
+      'Iran': 'Iran', 'IR Iran': 'Iran', 'IRI': 'Iran', 'IRN': 'Iran',
+      'New Zealand': 'New Zealand', 'Nueva Zelanda': 'New Zealand', 'NZL': 'New Zealand',
+      'France': 'France', 'Francia': 'France', 'FRA': 'France',
+      'Senegal': 'Senegal', 'SEN': 'Senegal',
+      'Iraq': 'Iraq', 'Irak': 'Iraq', 'IRQ': 'Iraq',
+      'Norway': 'Norway', 'Noruega': 'Norway', 'NOR': 'Norway',
+      'Spain': 'Spain', 'España': 'Spain', 'ESP': 'Spain',
+      'Cabo Verde': 'Cabo Verde', 'Cape Verde': 'Cabo Verde', 'CPV': 'Cabo Verde',
+      'Saudi Arabia': 'Saudi Arabia', 'Arabia Saudita': 'Saudi Arabia', 'KSA': 'Saudi Arabia', 'SAU': 'Saudi Arabia',
+      'Uruguay': 'Uruguay', 'URU': 'Uruguay',
+      'Argentina': 'Argentina', 'ARG': 'Argentina',
+      'Austria': 'Austria', 'AUT': 'Austria',
+      'Jordan': 'Jordan', 'Jordania': 'Jordan', 'JOR': 'Jordan',
+      'Algeria': 'Algeria', 'Argelia': 'Algeria', 'ALG': 'Algeria',
+      'Portugal': 'Portugal', 'POR': 'Portugal',
+      'DR Congo': 'DR Congo', 'Congo': 'DR Congo', 'Congo DR': 'DR Congo', 'Democratic Republic of Congo': 'DR Congo', 'Democratic Republic of the Congo': 'DR Congo', 'D.R. Congo': 'DR Congo', 'DRC': 'DR Congo', 'COD': 'DR Congo',
+      'Uzbekistan': 'Uzbekistan', 'UZB': 'Uzbekistan',
+      'Colombia': 'Colombia', 'COL': 'Colombia',
+      'England': 'England', 'Inglaterra': 'England', 'ENG': 'England',
+      'Croatia': 'Croatia', 'Croacia': 'Croatia', 'CRO': 'Croatia',
+      'Ghana': 'Ghana', 'GHA': 'Ghana',
+      'Panama': 'Panama', 'Panamá': 'Panama', 'PAN': 'Panama'
+    };
+    let TEAM_ALIAS_LOOKUP = null;
+
+    const RESULT_CACHE_KEY = 'prode_wc2026_results_v4_live_badges';
     const PRIZE_CACHE_KEY = 'prode_wc2026_prize_pool';
     const CACHE_MAX_AGE = 60 * 1000;
     const API_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=';
@@ -743,30 +810,32 @@
       const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
       const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
       if (!home || !away) return null;
-      const homeName = getEspnTeamName(home);
-      const awayName = getEspnTeamName(away);
+      const homeNames = getEspnTeamNames(home);
+      const awayNames = getEspnTeamNames(away);
       const homeScore = parseScore(home.score);
       const awayScore = parseScore(away.score);
-      const statusType = competition.status && competition.status.type ? competition.status.type : {};
+      const status = competition.status || {};
+      const statusType = status.type || {};
+      const normalizedState = normalizeMatchState(statusType, status);
       for (let i = 0; i < PRODE_DATA.matches.length; i += 1) {
         const match = PRODE_DATA.matches[i];
         const local1 = toEspnName(match.team1);
         const local2 = toEspnName(match.team2);
-        const normal = sameTeam(homeName, local1) && sameTeam(awayName, local2);
-        const reversed = sameTeam(homeName, local2) && sameTeam(awayName, local1);
+        const normal = sameTeamAny(homeNames, local1) && sameTeamAny(awayNames, local2);
+        const reversed = sameTeamAny(homeNames, local2) && sameTeamAny(awayNames, local1);
         if (!normal && !reversed) continue;
-        const hasScore = Number.isFinite(homeScore) && Number.isFinite(awayScore) && statusType.state !== 'pre';
+        const hasScore = Number.isFinite(homeScore) && Number.isFinite(awayScore) && normalizedState !== 'pre';
         const score = hasScore ? (normal ? [homeScore, awayScore] : [awayScore, homeScore]) : null;
         return {
           matchIndex: i,
           result: {
             score,
             date: event.date || null,
-            state: statusType.state || 'pre',
-            completed: Boolean(statusType.completed),
-            description: statusType.description || competition.status?.type?.shortDetail || '',
-            displayClock: competition.status?.displayClock || '',
-            period: competition.status?.period || null,
+            state: normalizedState,
+            completed: Boolean(statusType.completed) || normalizedState === 'post',
+            description: statusType.description || statusType.shortDetail || statusType.detail || '',
+            displayClock: status.displayClock || statusType.shortDetail || '',
+            period: status.period || null,
             sourceId: event.id || null,
             fetchedAt: Date.now()
           }
@@ -775,8 +844,34 @@
       return null;
     }
 
-    function getEspnTeamName(competitor) {
-      return competitor?.team?.displayName || competitor?.team?.shortDisplayName || competitor?.team?.name || '';
+    function normalizeMatchState(statusType = {}, status = {}) {
+      const state = String(statusType.state || '').toLowerCase();
+      if (state === 'post' || statusType.completed) return 'post';
+      if (state === 'in') return 'in';
+      if (state === 'pre') return 'pre';
+
+      const text = [
+        statusType.name,
+        statusType.description,
+        statusType.shortDetail,
+        statusType.detail,
+        status.displayClock
+      ].filter(Boolean).join(' ').toUpperCase();
+
+      if (/\b(FINAL|FT|FULL\s*TIME|COMPLETED|STATUS_FINAL)\b/.test(text)) return 'post';
+      if (/(IN_PROGRESS|STATUS_IN_PROGRESS|LIVE|EN VIVO|HALFTIME|HALF\s*TIME|1ST|2ND|FIRST HALF|SECOND HALF|EXTRA TIME|PENALTY|INTERMISSION)/.test(text)) return 'in';
+      return 'pre';
+    }
+
+    function getEspnTeamNames(competitor) {
+      const team = competitor?.team || {};
+      return [
+        team.displayName,
+        team.shortDisplayName,
+        team.name,
+        team.abbreviation,
+        team.location
+      ].filter(Boolean);
     }
 
     function parseScore(score) {
@@ -786,16 +881,38 @@
 
     function toEspnName(localName) { return TEAM_MAP[localName] || localName; }
 
-    function normalizeName(name) {
+    function normalizeBasicName(name) {
       return String(name || '')
         .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
+        .replace(/[\u0300-\u036f]/g, '')
         .replace(/&/g, 'and')
         .replace(/[^a-zA-Z0-9]+/g, ' ')
-        .replace(/\b(and|y|e)\b/gi, ' ')
+        .replace(/\b(and|y|e|the|of|de|del)\b/gi, ' ')
         .trim()
         .replace(/\s+/g, ' ')
         .toLowerCase();
+    }
+
+    function getTeamAliasLookup() {
+      if (!TEAM_ALIAS_LOOKUP) {
+        TEAM_ALIAS_LOOKUP = Object.entries(TEAM_ALIASES).reduce((lookup, [alias, canonical]) => {
+          const key = normalizeBasicName(alias);
+          const value = normalizeBasicName(canonical);
+          if (key && value) lookup[key] = value;
+          return lookup;
+        }, {});
+      }
+      return TEAM_ALIAS_LOOKUP;
+    }
+
+    function normalizeName(name) {
+      const basic = normalizeBasicName(name);
+      return getTeamAliasLookup()[basic] || basic;
+    }
+
+    function sameTeamAny(names, target) {
+      const list = Array.isArray(names) ? names : [names];
+      return list.some(name => sameTeam(name, target));
     }
 
     function sameTeam(a, b) {
@@ -803,7 +920,7 @@
       const y = normalizeName(b);
       if (!x || !y) return false;
       if (x === y) return true;
-      return x.includes(y) || y.includes(x);
+      return x.length > 3 && y.length > 3 && (x.includes(y) || y.includes(x));
     }
 
     function calculatePoints(pred, actual) {
@@ -1043,13 +1160,15 @@
       const actual = getResultScore(index);
       const expanded = APP_STATE.expandedMatches.has(String(index));
       const winners = actual ? PRODE_DATA.participants.filter(name => calculatePoints(match.predictions[name], actual) >= 5).length : 0;
+      const liveClass = isLiveEntry(entry) ? ' live-match' : '';
       return `
-        <article class="match-card">
+        <article class="match-card${liveClass}">
           <button class="match-toggle" type="button" data-match-index="${index}" aria-expanded="${expanded}">
             <div class="match-head">
               <div><div class="team right">${prettyTeam(match.team1)}</div><div class="match-meta">${formatKickoff(entry?.date)}</div></div>
               <div class="score-pill">${actual ? actual.join('-') : 'vs'}</div>
               <div><div class="team">${prettyTeam(match.team2)}</div><div class="match-meta">${match.group}</div></div>
+              ${statusBadge(entry)}
               <span class="count-badge">${actual ? winners + '/' + PRODE_DATA.participants.length + ' acertaron' : statusText(entry)}</span>
             </div>
           </button>
@@ -1133,12 +1252,13 @@
       const expanded = APP_STATE.expandedMatches.has(String(index));
       const winners = actual ? PRODE_DATA.participants.filter(name => calculatePoints(match.predictions[name], actual) >= 5).length : 0;
       return `
-        <article class="match-card">
+        <article class="match-card${isLiveEntry(entry) ? ' live-match' : ''}">
           <button class="match-toggle" type="button" data-match-index="${index}">
             <div class="match-head">
               <div><div class="team right">${prettyTeam(match.team1)}</div><div class="match-meta">${entry?.date ? formatDateTime(entry.date) : 'Horario a confirmar'}</div></div>
               <div class="score-pill">${actual ? actual.join('-') : 'vs'}</div>
               <div><div class="team">${prettyTeam(match.team2)}</div><div class="match-meta">${statusText(entry)}</div></div>
+              ${statusBadge(entry)}
               <span class="count-badge">${actual ? winners + '/' + PRODE_DATA.participants.length + ' acertaron' : 'Pendiente'}</span>
             </div>
           </button>
@@ -1511,17 +1631,33 @@
       drawer.setAttribute('aria-hidden', 'true');
     }
 
+    function isLiveEntry(entry) {
+      if (!entry) return false;
+      if (entry.state === 'in') return true;
+      const text = [entry.state, entry.description, entry.displayClock].filter(Boolean).join(' ').toUpperCase();
+      return /(IN_PROGRESS|STATUS_IN_PROGRESS|LIVE|EN VIVO|HALFTIME|HALF\s*TIME|1ST|2ND|FIRST HALF|SECOND HALF|EXTRA TIME|PENALTY|INTERMISSION)/.test(text);
+    }
+
+    function isFinalEntry(entry) {
+      if (!entry) return false;
+      if (entry.completed || entry.state === 'post') return true;
+      const text = [entry.state, entry.description].filter(Boolean).join(' ').toUpperCase();
+      return /\b(FINAL|FT|FULL\s*TIME|COMPLETED|STATUS_FINAL)\b/.test(text);
+    }
+
     function statusBadge(entry) {
-      const state = entry?.state || 'pre';
-      if (state === 'in') return '<span class="status live">EN VIVO 🔴</span>';
-      if (entry?.completed || state === 'post') return '<span class="status final">FINAL</span>';
+      if (isLiveEntry(entry)) {
+        const clock = entry?.displayClock ? ' · ' + escapeHtml(entry.displayClock) : '';
+        return `<span class="status live" title="Partido en vivo">EN VIVO${clock}</span>`;
+      }
+      if (isFinalEntry(entry)) return '<span class="status final">FINAL</span>';
       return '<span class="status pre">PRE-PARTIDO</span>';
     }
 
     function statusText(entry) {
       if (!entry) return 'Sin datos';
-      if (entry.state === 'in') return entry.displayClock ? 'En vivo · ' + entry.displayClock : 'En vivo';
-      if (entry.completed || entry.state === 'post') return 'Final';
+      if (isLiveEntry(entry)) return entry.displayClock ? 'En vivo · ' + entry.displayClock : 'En vivo';
+      if (isFinalEntry(entry)) return 'Final';
       return entry.venue ? 'Pre-partido · ' + entry.venue : 'Pre-partido';
     }
 
