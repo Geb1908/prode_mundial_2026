@@ -413,6 +413,31 @@
     }
     @keyframes toastIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
 
+    .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .curio-title { align-items: flex-start; }
+    .curio-actions { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; justify-content: end; }
+    .compact-label { min-width: 190px; }
+    .curio-highlight-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin: 14px 0 16px; }
+    .curio-highlight { padding: 14px; border: 1px solid rgba(42,53,80,.78); background: rgba(19,25,41,.68); border-radius: 16px; }
+    .curio-highlight span { display: block; color: var(--text-muted); font-size: .86rem; margin-bottom: 6px; }
+    .curio-highlight strong { display: block; color: white; line-height: 1.25; }
+    .curio-highlight p { margin: 8px 0 0; color: var(--text-muted); font-size: .9rem; }
+    .curio-match-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; }
+    .curio-match-card { border: 1px solid rgba(42,53,80,.78); border-radius: 16px; padding: 14px; background: linear-gradient(180deg, rgba(18,29,49,.74), rgba(10,14,26,.62)); }
+    .curio-match-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; margin-bottom: 12px; }
+    .curio-match-head strong { display: block; color: #fff; }
+    .curio-match-head span { display: block; color: var(--text-muted); font-size: .84rem; margin-top: 3px; }
+    .outcome-bars { display: grid; gap: 8px; }
+    .outcome-bar-label { display: flex; justify-content: space-between; gap: 10px; color: var(--text-muted); font-size: .86rem; margin-bottom: 4px; }
+    .outcome-bar-label strong { color: white; }
+    .bar-track { height: 9px; border-radius: 999px; overflow: hidden; background: rgba(100,116,139,.22); }
+    .bar-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--primary), var(--green)); min-width: 2px; }
+    .score-cloud { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .score-cloud span { border: 1px solid rgba(42,53,80,.78); background: rgba(10,14,26,.46); border-radius: 999px; padding: 6px 9px; color: var(--text-muted); }
+    .score-cloud strong { color: #fff; margin-left: 4px; }
+    .daily-ranking { display: grid; gap: 8px; }
+    .daily-row { display: grid; grid-template-columns: 44px minmax(0,1fr) auto auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid rgba(42,53,80,.62); border-radius: 14px; background: rgba(19,25,41,.58); }
+
     @media (max-width: 980px) {
       .grid.two, .sim-layout { grid-template-columns: 1fr; }
       .sticky-side { position: static; max-height: none; }
@@ -439,12 +464,53 @@
         border-top: 1px solid rgba(42,53,80,.88);
         border-bottom: 0;
       }
-      .tab-btn { flex: 1 1 0; padding: 10px 5px; font-size: .8rem; }
+      .tab-btn { flex: 1 1 0; padding: 9px 4px; font-size: .74rem; min-width: 0; }
       main { width: min(100% - 18px, 1440px); padding-top: 14px; }
-      .match-head { grid-template-columns: 1fr auto 1fr; }
-      .match-head .count-badge, .match-head .status { grid-column: 1 / -1; justify-self: center; }
-      .pred-table th:nth-child(4), .pred-table td:nth-child(4) { display: none; }
+      .card.pad { padding: 13px; border-radius: 16px; }
+      .section-title { align-items: flex-start; flex-direction: column; }
+      .section-title .pill { align-self: flex-start; }
+      .header-actions, .curio-actions { width: 100%; justify-content: stretch; }
+      .header-actions .pill, .header-actions .btn, .curio-actions .btn, .curio-actions label { flex: 1 1 100%; }
+      .brand-mark { width: 42px; height: 42px; }
+      .pill, .btn { min-height: 38px; padding: 8px 10px; font-size: .88rem; }
+      .stat-grid, .curio-highlight-grid { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .stat { padding: 11px; }
+      .stat strong { font-size: 1.22rem; }
+      .leader-row { grid-template-columns: 34px minmax(0, 1fr) auto; padding: 11px; gap: 9px; }
+      .points { font-size: 1.12rem; }
+      .filterbar select, .filterbar .filter-btn { flex: 1 1 calc(50% - 8px); min-width: 0; }
+      .match-head { grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 8px; padding: 12px; }
+      .team { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.18; }
+      .match-head .count-badge, .match-head .status { grid-column: 1 / -1; justify-self: center; max-width: 100%; white-space: normal; text-align: center; }
+      .score-pill { min-width: 44px; padding: 6px 8px; font-size: .94rem; }
+      .pred-table, .pred-table tbody, .pred-table tr, .pred-table td { display: block; width: 100%; }
+      .pred-table thead { display: none; }
+      .pred-table tr { padding: 10px 0; border-top: 1px solid rgba(42,53,80,.58); }
+      .pred-table tr:first-child { border-top: 0; }
+      .pred-table td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 7px 4px; border-top: 0; text-align: right; }
+      .pred-table td::before { content: attr(data-label); color: var(--text-muted); font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; text-align: left; }
+      .pred-table td:first-child { font-size: 1rem; }
+      .pred-table td:first-child::before { content: ''; display: none; }
+      .pred-table td:first-child { justify-content: flex-start; text-align: left; padding-top: 3px; }
+      .sim-grid, .curio-match-grid { grid-template-columns: 1fr; }
+      .sim-rank-row { grid-template-columns: 58px minmax(0,1fr) 54px 54px 42px; font-size: .82rem; gap: 5px; }
+      .curio-match-head { align-items: center; }
+      .daily-row { grid-template-columns: 36px minmax(0,1fr) auto; }
+      .daily-row strong { grid-column: 3; }
+      .daily-row span:nth-child(3) { grid-column: 2 / -1; color: var(--text-muted); font-size: .82rem; }
       .detail-row { grid-template-columns: 1fr 52px 52px 50px; }
+    }
+
+
+    @media (max-width: 430px) {
+      :root { --nav-h: 74px; }
+      .tabbar { gap: 4px; padding-left: 5px; padding-right: 5px; }
+      .tab-btn { font-size: .68rem; line-height: 1.05; padding: 8px 2px; }
+      .stat-grid, .curio-highlight-grid { grid-template-columns: 1fr; }
+      .match-meta, .mini-note { font-size: .78rem; }
+      .group-header { padding: 12px; }
+      .group-header span { font-size: .78rem; }
+      .score-cloud span { font-size: .84rem; }
     }
   </style>
 </head>
@@ -469,6 +535,7 @@
       <button class="tab-btn active" data-tab="tabla" type="button">📊 Tabla</button>
       <button class="tab-btn" data-tab="hoy" type="button">📅 Hoy</button>
       <button class="tab-btn" data-tab="partidos" type="button">⚽ Partidos</button>
+      <button class="tab-btn" data-tab="datos" type="button">✨ Datos</button>
       <button class="tab-btn" data-tab="simulador" type="button">🔮 Simulador</button>
     </nav>
 
@@ -542,6 +609,7 @@
       expandedGroups: new Set(PRODE_DATA.matches.map(m => m.group)),
       expandedMatches: new Set(),
       filters: { status: 'all', group: 'all' },
+      curioDate: null,
       simulatedOverrides: {},
       prizePool: Number(localStorage.getItem(PRIZE_CACHE_KEY) || 0)
     };
@@ -861,6 +929,7 @@
       if (APP_STATE.activeTab === 'tabla') renderTabla();
       if (APP_STATE.activeTab === 'hoy') renderHoy();
       if (APP_STATE.activeTab === 'partidos') renderPartidos();
+      if (APP_STATE.activeTab === 'datos') renderDatosCuriosos();
       if (APP_STATE.activeTab === 'simulador') renderSimulador();
     }
 
@@ -960,20 +1029,29 @@
             ${todayMatches.length ? `<div class="grid">${todayMatches.map(renderTodayMatch).join('')}</div>` : renderNoToday(next)}
           </article>
         </section>`;
+      $$('.match-toggle', app).forEach(btn => btn.addEventListener('click', () => {
+        const index = btn.dataset.matchIndex;
+        if (APP_STATE.expandedMatches.has(index)) APP_STATE.expandedMatches.delete(index); else APP_STATE.expandedMatches.add(index);
+        renderHoy();
+      }));
     }
 
     function renderTodayMatch(item) {
       const { match, index, entry } = item;
       const actual = getResultScore(index);
+      const expanded = APP_STATE.expandedMatches.has(String(index));
+      const winners = actual ? PRODE_DATA.participants.filter(name => calculatePoints(match.predictions[name], actual) >= 5).length : 0;
       return `
         <article class="match-card">
-          <div class="match-head">
-            <div><div class="team right">${prettyTeam(match.team1)}</div><div class="match-meta">${formatKickoff(entry?.date)}</div></div>
-            <div class="score-pill">${actual ? actual.join('-') : 'vs'}</div>
-            <div><div class="team">${prettyTeam(match.team2)}</div><div class="match-meta">${match.group}</div></div>
-            ${statusBadge(entry)}
-          </div>
-          ${renderPredictionTable(index, true)}
+          <button class="match-toggle" type="button" data-match-index="${index}" aria-expanded="${expanded}">
+            <div class="match-head">
+              <div><div class="team right">${prettyTeam(match.team1)}</div><div class="match-meta">${formatKickoff(entry?.date)}</div></div>
+              <div class="score-pill">${actual ? actual.join('-') : 'vs'}</div>
+              <div><div class="team">${prettyTeam(match.team2)}</div><div class="match-meta">${match.group}</div></div>
+              <span class="count-badge">${actual ? winners + '/' + PRODE_DATA.participants.length + ' acertaron' : statusText(entry)}</span>
+            </div>
+          </button>
+          ${expanded ? `<div class="match-expanded">${renderPredictionTable(index, true)}</div>` : ''}
         </article>`;
     }
 
@@ -1074,13 +1152,245 @@
         const points = calculatePoints(pred, actual);
         return { name, pred, points };
       }).sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, 'es'));
+      const actualLabel = withActual ? 'Resultado' : 'Real';
       return `
-        <table class="pred-table">
-          <thead><tr><th>Jugador</th><th>Prode</th><th>${withActual ? 'Resultado' : 'Real'}</th><th>Regla</th><th>Puntos</th></tr></thead>
-          <tbody>
-            ${rows.map(row => `<tr><td>${escapeHtml(row.name)}</td><td>${formatPrediction(row.pred)}</td><td>${formatScore(actual)}</td><td>${ruleLabel(row.points, actual, row.pred)}</td><td><span class="point-chip p${row.points}">${actual ? row.points : '—'}</span></td></tr>`).join('')}
-          </tbody>
-        </table>`;
+        <div class="table-wrap">
+          <table class="pred-table">
+            <thead><tr><th>Jugador</th><th>Prode</th><th>${actualLabel}</th><th>Regla</th><th>Puntos</th></tr></thead>
+            <tbody>
+              ${rows.map(row => `<tr><td data-label="Jugador">${escapeHtml(row.name)}</td><td data-label="Prode">${formatPrediction(row.pred)}</td><td data-label="${actualLabel}">${formatScore(actual)}</td><td data-label="Regla">${ruleLabel(row.points, actual, row.pred)}</td><td data-label="Puntos"><span class="point-chip p${row.points}">${actual ? row.points : '—'}</span></td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderDatosCuriosos() {
+      const dates = getAllMatchDates();
+      const selectedDate = ensureCurioDate(dates);
+      const dayMatches = getMatchesForDateKey(selectedDate);
+      const played = dayMatches.filter(item => isPlayed(item.index));
+      const highlights = buildCurioHighlights(dayMatches);
+      const dailyRanking = computeDailyLeaderboard(dayMatches);
+      app.innerHTML = `
+        <section class="grid curiosidades">
+          <article class="card pad">
+            <div class="section-title curio-title">
+              <div><h2>Datos curiosos</h2><p>Elegí un día y compartí perlitas del prode por WhatsApp.</p></div>
+              <div class="curio-actions">
+                <label class="compact-label">Día
+                  <select id="curioDate" aria-label="Elegir día">
+                    ${dates.map(dateKey => `<option value="${dateKey}" ${dateKey === selectedDate ? 'selected' : ''}>${formatDateKeyLong(dateKey)}</option>`).join('')}
+                  </select>
+                </label>
+                <button class="btn ghost" id="copyCurios" type="button">Copiar resumen</button>
+                <button class="btn" id="waCurios" type="button">Compartir WhatsApp</button>
+              </div>
+            </div>
+            <div class="stat-grid curio-stats">
+              <div class="stat"><strong>${dayMatches.length}</strong><span>Partidos del día</span></div>
+              <div class="stat"><strong>${played.length}</strong><span>Con resultado</span></div>
+              <div class="stat"><strong>${highlights.totalExactos}</strong><span>Exactos del día</span></div>
+              <div class="stat"><strong>${highlights.biggestConsensus ? Math.round(highlights.biggestConsensus.pct) + '%' : '—'}</strong><span>Mayor consenso</span></div>
+            </div>
+            ${dayMatches.length ? `
+              <div class="curio-highlight-grid">
+                ${renderCurioHighlight('🔥 Favorito más claro', highlights.biggestConsensus ? `${outcomeLabel(highlights.biggestConsensus.match, highlights.biggestConsensus.outcome)} en ${prettyTeam(highlights.biggestConsensus.match.team1)} vs ${prettyTeam(highlights.biggestConsensus.match.team2)}` : 'Todavía no hay pronósticos suficientes', highlights.biggestConsensus ? `${highlights.biggestConsensus.count}/${highlights.biggestConsensus.total} jugadores (${Math.round(highlights.biggestConsensus.pct)}%) fueron por esa tendencia.` : '—')}
+                ${renderCurioHighlight('🤯 Partido más dividido', highlights.mostDivided ? `${prettyTeam(highlights.mostDivided.match.team1)} vs ${prettyTeam(highlights.mostDivided.match.team2)}` : 'Sin datos', highlights.mostDivided ? `La opción más votada apenas junta ${highlights.mostDivided.count}/${highlights.mostDivided.total} (${Math.round(highlights.mostDivided.pct)}%).` : '—')}
+                ${renderCurioHighlight('🎯 Marcador de moda', highlights.topScore ? `${highlights.topScore.score} en ${prettyTeam(highlights.topScore.match.team1)} vs ${prettyTeam(highlights.topScore.match.team2)}` : 'Sin datos', highlights.topScore ? `Lo eligieron ${highlights.topScore.count} jugadores.` : '—')}
+              </div>
+              <div class="curio-match-grid">
+                ${dayMatches.map(renderCurioMatchCard).join('')}
+              </div>
+            ` : renderNoToday(findNextDatedMatch(dateKeyArgentina(new Date())))}
+          </article>
+          <article class="card pad">
+            <div class="section-title"><div><h3>Ranking del día</h3><p>Solo computa partidos de esta fecha que ya tengan resultado.</p></div></div>
+            ${played.length ? renderDailyRanking(dailyRanking) : '<div class="empty"><strong>Aún no hay puntos para este día.</strong><p>Cuando haya resultados, acá aparece la mini-tabla diaria para chicanear.</p></div>'}
+          </article>
+        </section>`;
+      $('#curioDate')?.addEventListener('change', event => { APP_STATE.curioDate = event.target.value; renderDatosCuriosos(); });
+      $('#copyCurios')?.addEventListener('click', () => copyCurioSummary(selectedDate));
+      $('#waCurios')?.addEventListener('click', () => shareCurioSummary(selectedDate));
+    }
+
+    function getAllMatchDates() {
+      return Array.from(new Set(PRODE_DATA.matches.map((match, index) => getResultEntry(index)?.date).filter(Boolean).map(date => dateKeyArgentina(new Date(date))))).sort();
+    }
+
+    function ensureCurioDate(dates = getAllMatchDates()) {
+      if (!dates.length) return null;
+      const today = dateKeyArgentina(new Date());
+      if (APP_STATE.curioDate && dates.includes(APP_STATE.curioDate)) return APP_STATE.curioDate;
+      APP_STATE.curioDate = dates.find(date => date >= today) || dates[dates.length - 1];
+      return APP_STATE.curioDate;
+    }
+
+    function getMatchesForDateKey(dateKey) {
+      if (!dateKey) return [];
+      return PRODE_DATA.matches.map((match, index) => ({ match, index, entry: getResultEntry(index) }))
+        .filter(item => item.entry?.date && dateKeyArgentina(new Date(item.entry.date)) === dateKey)
+        .sort((a, b) => String(a.entry.date).localeCompare(String(b.entry.date)));
+    }
+
+    function buildCurioHighlights(items) {
+      const candidates = [];
+      let topScore = null;
+      let totalExactos = 0;
+      items.forEach(item => {
+        const stats = predictionStats(item.match);
+        const actual = getResultScore(item.index);
+        if (actual) {
+          totalExactos += PRODE_DATA.participants.filter(name => calculatePoints(item.match.predictions[name], actual) === 10).length;
+        }
+        const favorite = stats.outcomes[0];
+        if (favorite && stats.valid) {
+          candidates.push({ ...favorite, total: stats.valid, pct: favorite.count / stats.valid * 100, match: item.match, index: item.index });
+        }
+        const score = stats.scores[0];
+        if (score && (!topScore || score.count > topScore.count)) {
+          topScore = { ...score, match: item.match, index: item.index };
+        }
+      });
+      const biggestConsensus = candidates.slice().sort((a, b) => b.pct - a.pct || b.count - a.count)[0] || null;
+      const mostDivided = candidates.slice().sort((a, b) => a.pct - b.pct || a.count - b.count)[0] || null;
+      return { biggestConsensus, mostDivided, topScore, totalExactos };
+    }
+
+    function predictionStats(match) {
+      const outcomeMap = new Map([['home', 0], ['draw', 0], ['away', 0]]);
+      const scoreMap = new Map();
+      let valid = 0;
+      let missing = 0;
+      for (const pred of Object.values(match.predictions)) {
+        if (!Array.isArray(pred)) { missing += 1; continue; }
+        valid += 1;
+        const outcome = scoreOutcome(pred);
+        outcomeMap.set(outcome, (outcomeMap.get(outcome) || 0) + 1);
+        const score = pred.join('-');
+        scoreMap.set(score, (scoreMap.get(score) || 0) + 1);
+      }
+      const outcomes = Array.from(outcomeMap.entries()).map(([outcome, count]) => ({ outcome, count })).sort((a, b) => b.count - a.count);
+      const scores = Array.from(scoreMap.entries()).map(([score, count]) => ({ score, count })).sort((a, b) => b.count - a.count || a.score.localeCompare(b.score)).slice(0, 3);
+      return { valid, missing, outcomes, scores };
+    }
+
+    function scoreOutcome(score) {
+      if (!Array.isArray(score)) return null;
+      if (score[0] > score[1]) return 'home';
+      if (score[0] < score[1]) return 'away';
+      return 'draw';
+    }
+
+    function outcomeLabel(match, outcome) {
+      if (outcome === 'home') return 'Gana ' + prettyTeam(match.team1);
+      if (outcome === 'away') return 'Gana ' + prettyTeam(match.team2);
+      if (outcome === 'draw') return 'Empate';
+      return 'Sin dato';
+    }
+
+    function renderCurioHighlight(icon, title, detail) {
+      return `<div class="curio-highlight"><span>${icon}</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(detail)}</p></div>`;
+    }
+
+    function renderCurioMatchCard(item) {
+      const { match, index, entry } = item;
+      const stats = predictionStats(match);
+      const actual = getResultScore(index);
+      const exactos = actual ? PRODE_DATA.participants.filter(name => calculatePoints(match.predictions[name], actual) === 10).length : 0;
+      return `
+        <article class="curio-match-card">
+          <div class="curio-match-head">
+            <div><strong>${prettyTeam(match.team1)} vs ${prettyTeam(match.team2)}</strong><span>${match.group} · ${formatKickoff(entry?.date)}</span></div>
+            <div class="score-pill">${actual ? actual.join('-') : 'vs'}</div>
+          </div>
+          <div class="outcome-bars">
+            ${stats.outcomes.map(row => renderOutcomeBar(match, row, stats.valid)).join('')}
+          </div>
+          <div class="score-cloud">
+            ${stats.scores.map(row => `<span>${row.score} <strong>${row.count}</strong></span>`).join('') || '<span>Sin pronósticos</span>'}
+          </div>
+          <p class="mini-note">${actual ? `${exactos} exactos con el resultado real.` : `Marcadores más elegidos arriba. ${stats.missing ? stats.missing + ' sin cargar.' : 'Todos cargaron.'}`}</p>
+        </article>`;
+    }
+
+    function renderOutcomeBar(match, row, total) {
+      const pct = total ? row.count / total * 100 : 0;
+      return `
+        <div class="outcome-bar">
+          <div class="outcome-bar-label"><span>${escapeHtml(outcomeLabel(match, row.outcome))}</span><strong>${row.count}</strong></div>
+          <div class="bar-track"><span style="width:${pct}%"></span></div>
+        </div>`;
+    }
+
+    function computeDailyLeaderboard(items) {
+      const rows = PRODE_DATA.participants.map(name => {
+        const breakdown = Object.fromEntries(SCORE_TIERS.map(t => [t, 0]));
+        const points = items.map(item => calculatePoints(item.match.predictions[name], getResultScore(item.index)));
+        points.forEach(point => { breakdown[point] = (breakdown[point] || 0) + 1; });
+        return { name, total: points.reduce((sum, point) => sum + point, 0), breakdown, exactos: breakdown[10] || 0 };
+      }).sort((a, b) => b.total - a.total || b.exactos - a.exactos || a.name.localeCompare(b.name, 'es'));
+      return assignRanks(rows);
+    }
+
+    function renderDailyRanking(rows) {
+      return `
+        <div class="daily-ranking">
+          ${rows.slice(0, 10).map(row => `
+            <div class="daily-row">
+              <span class="rank ${row.rank <= 3 ? 'r' + row.rank : ''}">${row.rank <= 3 ? ['🥇','🥈','🥉'][row.rank - 1] : row.rank}</span>
+              <span class="player-name">${escapeHtml(row.name)}</span>
+              <span>${row.exactos} exactos</span>
+              <strong>${row.total} pts</strong>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    function buildCurioShareText(dateKey) {
+      const items = getMatchesForDateKey(dateKey);
+      const highlights = buildCurioHighlights(items);
+      const ranking = computeDailyLeaderboard(items).filter(row => row.total > 0).slice(0, 5);
+      const lines = [
+        `✨ Datos de color del prode · ${formatDateKeyLong(dateKey)}`,
+        `Partidos: ${items.length}`
+      ];
+      if (highlights.biggestConsensus) lines.push(`🔥 Favorito más claro: ${outcomeLabel(highlights.biggestConsensus.match, highlights.biggestConsensus.outcome)} (${highlights.biggestConsensus.count}/${highlights.biggestConsensus.total})`);
+      if (highlights.mostDivided) lines.push(`🤯 Más dividido: ${prettyTeam(highlights.mostDivided.match.team1)} vs ${prettyTeam(highlights.mostDivided.match.team2)} (${Math.round(highlights.mostDivided.pct)}% la opción más votada)`);
+      if (highlights.topScore) lines.push(`🎯 Marcador de moda: ${highlights.topScore.score} en ${prettyTeam(highlights.topScore.match.team1)} vs ${prettyTeam(highlights.topScore.match.team2)} (${highlights.topScore.count} votos)`);
+      if (ranking.length) {
+        lines.push('', '🏆 Top del día:');
+        ranking.forEach(row => lines.push(`${row.rank}. ${row.name}: ${row.total} pts`));
+      }
+      lines.push('', '📱 Más detalles en la app del Prode Mundial 2026');
+      return lines.join('\n');
+    }
+
+    async function copyCurioSummary(dateKey) {
+      const text = buildCurioShareText(dateKey);
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Resumen copiado para pegar en WhatsApp');
+      } catch (error) {
+        const area = document.createElement('textarea');
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+        showToast('Resumen copiado');
+      }
+    }
+
+    function shareCurioSummary(dateKey) {
+      const text = buildCurioShareText(dateKey);
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener,noreferrer');
+    }
+
+    function formatDateKeyLong(dateKey) {
+      if (!dateKey) return 'Sin fecha';
+      const y = dateKey.slice(0, 4);
+      const m = dateKey.slice(4, 6);
+      const d = dateKey.slice(6, 8);
+      return new Intl.DateTimeFormat('es-AR', { timeZone: ARG_TIME_ZONE, weekday: 'short', day: '2-digit', month: 'short' }).format(new Date(`${y}-${m}-${d}T12:00:00-03:00`)).replace('.', '');
     }
 
     function renderSimulador() {
