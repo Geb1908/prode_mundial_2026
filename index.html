@@ -223,6 +223,23 @@
     .player-name { color: #f8fbff; font-weight: 850; letter-spacing: -.01em; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 0 rgba(0,0,0,.35); }
     .points { font-size: 1.35rem; font-weight: 950; color: white; }
     .mini-note { color: var(--text-muted); font-size: .82rem; margin-top: 3px; }
+    .leader-main { min-width: 0; }
+    .rule-summary { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+    .rule-count-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      color: rgba(248,251,255,.92);
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(10,14,26,.34);
+      font-size: .72rem;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .rule-count-chip strong { color: white; font-weight: 950; }
+    .leader-extra-note { margin-top: 6px; }
 
     .breakbar { height: 13px; border-radius: 999px; display: flex; overflow: hidden; background: rgba(100,116,139,.22); box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); }
     .breakbar span { min-width: 2px; }
@@ -481,6 +498,8 @@
       .stat { padding: 11px; }
       .stat strong { font-size: 1.22rem; }
       .leader-row { grid-template-columns: 34px minmax(0, 1fr) auto; padding: 11px; gap: 9px; }
+      .rule-summary { gap: 4px; margin-top: 6px; }
+      .rule-count-chip { padding: 4px 6px; font-size: .68rem; }
       .points { font-size: 1.12rem; }
       .filterbar select, .filterbar .filter-btn { flex: 1 1 calc(50% - 8px); min-width: 0; }
       .match-head { grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 8px; padding: 12px; }
@@ -512,6 +531,8 @@
       .tab-btn { font-size: .68rem; line-height: 1.05; padding: 8px 2px; }
       .stat-grid, .curio-highlight-grid { grid-template-columns: 1fr; }
       .match-meta, .mini-note { font-size: .78rem; }
+      .rule-count-chip { font-size: .64rem; padding: 4px 5px; }
+      .rule-count-chip strong { font-size: .72rem; }
       .group-header { padding: 12px; }
       .group-header span { font-size: .78rem; }
       .score-cloud span { font-size: .84rem; }
@@ -663,6 +684,16 @@
     const CACHE_MAX_AGE = 60 * 1000;
     const API_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=';
     const SCORE_TIERS = [10, 8, 7, 6, 5, 2, 1, 0];
+    const SCORE_RULES = [
+      { points: 10, label: 'Exacto', short: 'Exacto' },
+      { points: 8, label: 'Ganador + diferencia', short: 'G+diferencia' },
+      { points: 7, label: 'Ganador + goles', short: 'G+goles' },
+      { points: 6, label: 'Empate correcto', short: 'Empate' },
+      { points: 5, label: 'Ganador', short: 'Ganador' },
+      { points: 2, label: 'Goles de un equipo', short: 'Goles equipo' },
+      { points: 1, label: 'Resultado inverso', short: 'Inverso' },
+      { points: 0, label: 'Nada', short: 'Nada' }
+    ];
     const GROUP_DATES = makeDateRange('2026-06-11', '2026-06-28');
     const ARG_TIME_ZONE = 'America/Argentina/Cordoba';
     const FIXTURE_SCHEDULE = [{"date":"2026-06-11T19:00:00Z","venue":"Mexico City Stadium"},{"date":"2026-06-12T02:00:00Z","venue":"Estadio Guadalajara"},{"date":"2026-06-18T16:00:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-19T01:00:00Z","venue":"Estadio Guadalajara"},{"date":"2026-06-25T01:00:00Z","venue":"Mexico City Stadium"},{"date":"2026-06-25T01:00:00Z","venue":"Estadio Monterrey"},{"date":"2026-06-12T19:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-13T19:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-18T19:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-18T22:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-24T19:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-24T19:00:00Z","venue":"Seattle Stadium"},{"date":"2026-06-13T22:00:00Z","venue":"New York New Jersey Stadium"},{"date":"2026-06-14T01:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-19T22:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-20T00:30:00Z","venue":"Philadelphia Stadium"},{"date":"2026-06-24T22:00:00Z","venue":"Miami Stadium"},{"date":"2026-06-24T22:00:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-13T01:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-14T04:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-19T19:00:00Z","venue":"Seattle Stadium"},{"date":"2026-06-20T03:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-26T02:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-26T02:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-14T17:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-14T23:00:00Z","venue":"Philadelphia Stadium"},{"date":"2026-06-20T20:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-21T00:00:00Z","venue":"Kansas City Stadium"},{"date":"2026-06-25T20:00:00Z","venue":"Philadelphia Stadium"},{"date":"2026-06-25T20:00:00Z","venue":"New York New Jersey Stadium"},{"date":"2026-06-14T20:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-15T02:00:00Z","venue":"Estadio Monterrey"},{"date":"2026-06-20T17:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-21T04:00:00Z","venue":"Estadio Monterrey"},{"date":"2026-06-25T23:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-25T23:00:00Z","venue":"Kansas City Stadium"},{"date":"2026-06-15T19:00:00Z","venue":"Seattle Stadium"},{"date":"2026-06-16T01:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-21T19:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-22T01:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-27T03:00:00Z","venue":"Seattle Stadium"},{"date":"2026-06-27T03:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-15T16:00:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-15T22:00:00Z","venue":"Miami Stadium"},{"date":"2026-06-21T16:00:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-21T22:00:00Z","venue":"Miami Stadium"},{"date":"2026-06-27T00:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-27T00:00:00Z","venue":"Estadio Guadalajara"},{"date":"2026-06-16T19:00:00Z","venue":"New York New Jersey Stadium"},{"date":"2026-06-16T22:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-22T21:00:00Z","venue":"Philadelphia Stadium"},{"date":"2026-06-23T00:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-26T19:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-26T19:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-17T01:00:00Z","venue":"Kansas City Stadium"},{"date":"2026-06-17T04:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-22T17:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-23T03:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-28T02:00:00Z","venue":"Kansas City Stadium"},{"date":"2026-06-28T02:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-17T17:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-18T02:00:00Z","venue":"Mexico City Stadium"},{"date":"2026-06-23T17:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-24T02:00:00Z","venue":"Estadio Guadalajara"},{"date":"2026-06-27T23:30:00Z","venue":"Miami Stadium"},{"date":"2026-06-27T23:30:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-17T20:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-17T23:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-23T20:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-23T23:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-27T21:00:00Z","venue":"New York New Jersey Stadium"},{"date":"2026-06-27T21:00:00Z","venue":"Philadelphia Stadium"}];
@@ -948,14 +979,25 @@
       const useSimulationDefaults = Boolean(options.useSimulationDefaults);
       const rows = PRODE_DATA.participants.map(name => {
         const breakdown = Object.fromEntries(SCORE_TIERS.map(t => [t, 0]));
+        let pending = 0;
+        let noPrediction = 0;
         const matchPoints = PRODE_DATA.matches.map((match, index) => {
           const actual = useSimulationDefaults ? getSimulatedScore(index, resultSet) : getResultScore(index, resultSet);
-          const points = calculatePoints(match.predictions[name], actual);
+          const pred = match.predictions[name];
+          if (!Array.isArray(actual)) {
+            pending += 1;
+            return 0;
+          }
+          if (!Array.isArray(pred)) {
+            noPrediction += 1;
+            return 0;
+          }
+          const points = calculatePoints(pred, actual);
           breakdown[points] = (breakdown[points] || 0) + 1;
           return points;
         });
         const total = matchPoints.reduce((sum, pts) => sum + pts, 0);
-        return { name, total, breakdown, matchPoints };
+        return { name, total, breakdown, matchPoints, pending, noPrediction };
       }).sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'es'));
       return assignRanks(rows);
     }
@@ -1090,14 +1132,32 @@
       const missing = countMissingPredictions(row.name);
       const rank = row.rank === 1 ? '🥇' : row.rank === 2 ? '🥈' : row.rank === 3 ? '🥉' : row.rank;
       const rankClass = row.rank <= 3 ? 'r' + row.rank : '';
+      const pending = Number(row.pending || 0);
+      const extraNotes = [
+        pending ? `${pending} pendientes` : '',
+        row.noPrediction ? `${row.noPrediction} sin prode en partidos jugados` : '',
+        missing ? `${missing} pronósticos sin cargar` : ''
+      ].filter(Boolean).join(' · ');
       return `
         <button class="leader-row" type="button" data-name="${escapeAttr(row.name)}">
           <div class="rank ${rankClass}">${rank}</div>
-          <div><div class="player-name">${escapeHtml(row.name)}</div><div class="mini-note">${row.breakdown[10]} exactos · ${row.breakdown[8]} con diferencia${missing ? ' · ' + missing + ' sin cargar' : ''}</div></div>
+          <div class="leader-main">
+            <div class="player-name">${escapeHtml(row.name)}</div>
+            ${renderRuleCountChips(row)}
+            ${extraNotes ? `<div class="mini-note leader-extra-note">${extraNotes}</div>` : ''}
+          </div>
           <div class="points">${row.total}</div>
           ${renderBreakbar(row)}
         </button>
       `;
+    }
+
+    function renderRuleCountChips(row) {
+      const chips = SCORE_RULES.map(rule => {
+        const count = Number(row.breakdown?.[rule.points] || 0);
+        return `<span class="rule-count-chip tier-${rule.points}" title="${escapeAttr(rule.label)} · ${rule.points} pts"><strong>${count}</strong> ${escapeHtml(rule.short)}</span>`;
+      }).join('');
+      return `<div class="rule-summary" aria-label="Desglose de reglas de puntaje">${chips}</div>`;
     }
 
     function renderBreakbar(row) {
@@ -1664,16 +1724,7 @@
     function ruleLabel(points, actual, pred) {
       if (!actual) return 'Pendiente';
       if (!Array.isArray(pred)) return 'Sin prode';
-      return {
-        10: 'Exacto',
-        8: 'Ganador + diferencia',
-        7: 'Ganador + goles',
-        6: 'Empate correcto',
-        5: 'Ganador',
-        2: 'Goles de un equipo',
-        1: 'Resultado inverso',
-        0: 'Nada'
-      }[points] || 'Nada';
+      return SCORE_RULES.find(rule => rule.points === points)?.label || 'Nada';
     }
 
     function prettyTeam(name) {
