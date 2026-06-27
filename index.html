@@ -312,6 +312,9 @@
     .team.right { text-align: right; }
     .match-meta { color: var(--text-muted); font-size: .84rem; margin-top: 3px; }
 
+    .phase-tag { color: var(--primary); font-weight: 850; }
+    .match-id { color: var(--gold); font-weight: 900; }
+
     .pred-table { width: 100%; border-collapse: collapse; }
     .pred-table th, .pred-table td { padding: 10px 12px; border-top: 1px solid rgba(42,53,80,.58); text-align: left; }
     .pred-table th { color: var(--text-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .07em; background: rgba(10,14,26,.26); }
@@ -345,13 +348,19 @@
     .filter-btn.active { color: white; border-color: rgba(78,168,255,.72); background: rgba(78,168,255,.24); }
 
     .group-block { margin-bottom: 14px; border: 1px solid rgba(42,53,80,.82); border-radius: 18px; overflow: hidden; background: linear-gradient(180deg, rgba(18,29,49,.72), rgba(8,13,24,.66)); }
-    .group-header { width: 100%; border: 0; color: var(--text); background: linear-gradient(90deg, rgba(78,168,255,.22), rgba(31,191,117,.12), rgba(255,77,109,.10)); padding: 15px 16px; text-align: left; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
-    .group-header strong { letter-spacing: .08em; }
-    .group-header span { color: var(--text-muted); font-size: .9rem; }
+    .stage-block { margin-bottom: 14px; border: 1px solid rgba(78,168,255,.34); border-radius: 20px; overflow: hidden; background: linear-gradient(180deg, rgba(22,34,55,.82), rgba(8,13,24,.72)); box-shadow: 0 18px 54px rgba(0,0,0,.24); }
+    .stage-header, .group-header { width: 100%; border: 0; color: var(--text); padding: 15px 16px; text-align: left; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .stage-header { background: linear-gradient(90deg, rgba(78,168,255,.34), rgba(31,191,117,.18), rgba(255,77,109,.14)); }
+    .group-header { background: linear-gradient(90deg, rgba(78,168,255,.22), rgba(31,191,117,.12), rgba(255,77,109,.10)); }
+    .stage-header strong, .group-header strong { letter-spacing: .08em; }
+    .stage-header span, .group-header span { color: var(--text-muted); font-size: .9rem; }
+    .stage-content { display: grid; gap: 10px; padding: 12px; background: rgba(5,8,20,.18); }
+    .stage-content .group-block { margin-bottom: 0; background: linear-gradient(180deg, rgba(18,29,49,.66), rgba(8,13,24,.58)); }
+    .stage-content .group-header { padding-left: 20px; }
     .group-content { display: grid; gap: 10px; padding: 12px; }
     .chev { transition: transform .2s ease; }
     .collapsed .chev { transform: rotate(-90deg); }
-    .collapsed .group-content { display: none; }
+    .collapsed .group-content, .collapsed .stage-content { display: none; }
     .match-toggle { width: 100%; border: 0; color: var(--text); background: transparent; text-align: left; }
     .match-expanded { border-top: 1px solid rgba(42,53,80,.64); }
 
@@ -681,7 +690,7 @@
     };
     let TEAM_ALIAS_LOOKUP = null;
 
-    const RESULT_CACHE_KEY = 'prode_wc2026_results_v4_live_badges';
+    const RESULT_CACHE_KEY = 'prode_wc2026_results_v5_knockouts';
     const PRIZE_CACHE_KEY = 'prode_wc2026_prize_pool';
     const CACHE_MAX_AGE = 60 * 1000;
     const API_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=';
@@ -696,9 +705,27 @@
       { points: 1, label: 'Resultado inverso', short: 'Inverso' },
       { points: 0, label: 'Nada', short: 'Nada' }
     ];
-    const GROUP_DATES = makeDateRange('2026-06-11', '2026-06-28');
+    const TOURNAMENT_DATES = makeDateRange('2026-06-11', '2026-07-19');
     const ARG_TIME_ZONE = 'America/Argentina/Cordoba';
     const FIXTURE_SCHEDULE = [{"date":"2026-06-11T19:00:00Z","venue":"Mexico City Stadium"},{"date":"2026-06-12T02:00:00Z","venue":"Estadio Guadalajara"},{"date":"2026-06-18T16:00:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-19T01:00:00Z","venue":"Estadio Guadalajara"},{"date":"2026-06-25T01:00:00Z","venue":"Mexico City Stadium"},{"date":"2026-06-25T01:00:00Z","venue":"Estadio Monterrey"},{"date":"2026-06-12T19:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-13T19:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-18T19:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-18T22:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-24T19:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-24T19:00:00Z","venue":"Seattle Stadium"},{"date":"2026-06-13T22:00:00Z","venue":"New York New Jersey Stadium"},{"date":"2026-06-14T01:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-19T22:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-20T00:30:00Z","venue":"Philadelphia Stadium"},{"date":"2026-06-24T22:00:00Z","venue":"Miami Stadium"},{"date":"2026-06-24T22:00:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-13T01:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-14T04:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-19T19:00:00Z","venue":"Seattle Stadium"},{"date":"2026-06-20T03:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-26T02:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-26T02:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-14T17:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-14T23:00:00Z","venue":"Philadelphia Stadium"},{"date":"2026-06-20T20:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-21T00:00:00Z","venue":"Kansas City Stadium"},{"date":"2026-06-25T20:00:00Z","venue":"Philadelphia Stadium"},{"date":"2026-06-25T20:00:00Z","venue":"New York New Jersey Stadium"},{"date":"2026-06-14T20:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-15T02:00:00Z","venue":"Estadio Monterrey"},{"date":"2026-06-20T17:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-21T04:00:00Z","venue":"Estadio Monterrey"},{"date":"2026-06-25T23:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-25T23:00:00Z","venue":"Kansas City Stadium"},{"date":"2026-06-15T19:00:00Z","venue":"Seattle Stadium"},{"date":"2026-06-16T01:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-21T19:00:00Z","venue":"Los Angeles Stadium"},{"date":"2026-06-22T01:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-27T03:00:00Z","venue":"Seattle Stadium"},{"date":"2026-06-27T03:00:00Z","venue":"BC Place Vancouver"},{"date":"2026-06-15T16:00:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-15T22:00:00Z","venue":"Miami Stadium"},{"date":"2026-06-21T16:00:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-21T22:00:00Z","venue":"Miami Stadium"},{"date":"2026-06-27T00:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-27T00:00:00Z","venue":"Estadio Guadalajara"},{"date":"2026-06-16T19:00:00Z","venue":"New York New Jersey Stadium"},{"date":"2026-06-16T22:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-22T21:00:00Z","venue":"Philadelphia Stadium"},{"date":"2026-06-23T00:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-26T19:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-26T19:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-17T01:00:00Z","venue":"Kansas City Stadium"},{"date":"2026-06-17T04:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-22T17:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-23T03:00:00Z","venue":"San Francisco Bay Area Stadium"},{"date":"2026-06-28T02:00:00Z","venue":"Kansas City Stadium"},{"date":"2026-06-28T02:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-17T17:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-18T02:00:00Z","venue":"Mexico City Stadium"},{"date":"2026-06-23T17:00:00Z","venue":"Houston Stadium"},{"date":"2026-06-24T02:00:00Z","venue":"Estadio Guadalajara"},{"date":"2026-06-27T23:30:00Z","venue":"Miami Stadium"},{"date":"2026-06-27T23:30:00Z","venue":"Atlanta Stadium"},{"date":"2026-06-17T20:00:00Z","venue":"Dallas Stadium"},{"date":"2026-06-17T23:00:00Z","venue":"Toronto Stadium"},{"date":"2026-06-23T20:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-23T23:00:00Z","venue":"Boston Stadium"},{"date":"2026-06-27T21:00:00Z","venue":"New York New Jersey Stadium"},{"date":"2026-06-27T21:00:00Z","venue":"Philadelphia Stadium"}];
+
+    const KNOCKOUT_MATCHES = [{"group": "16avos de final", "phase": "16avos", "matchNumber": 73, "team1": "2° Grupo A", "team2": "2° Grupo B", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 74, "team1": "1° Grupo E", "team2": "3° Grupo A/B/C/D/F", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 75, "team1": "1° Grupo F", "team2": "2° Grupo C", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 76, "team1": "1° Grupo C", "team2": "2° Grupo F", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 77, "team1": "1° Grupo I", "team2": "3° Grupo C/D/F/G/H", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 78, "team1": "2° Grupo E", "team2": "2° Grupo I", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 79, "team1": "1° Grupo A", "team2": "3° Grupo C/E/F/H/I", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 80, "team1": "1° Grupo L", "team2": "3° Grupo E/H/I/J/K", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 81, "team1": "1° Grupo D", "team2": "3° Grupo B/E/F/I/J", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 82, "team1": "1° Grupo G", "team2": "3° Grupo A/E/H/I/J", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 83, "team1": "2° Grupo K", "team2": "2° Grupo L", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 84, "team1": "1° Grupo H", "team2": "2° Grupo J", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 85, "team1": "1° Grupo B", "team2": "3° Grupo E/F/G/I/J", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 86, "team1": "1° Grupo J", "team2": "2° Grupo H", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 87, "team1": "1° Grupo K", "team2": "3° Grupo D/E/I/J/L", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "16avos de final", "phase": "16avos", "matchNumber": 88, "team1": "2° Grupo D", "team2": "2° Grupo G", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Octavos de final", "phase": "octavos", "matchNumber": 89, "team1": "Ganador M74", "team2": "Ganador M77", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Octavos de final", "phase": "octavos", "matchNumber": 90, "team1": "Ganador M73", "team2": "Ganador M75", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Octavos de final", "phase": "octavos", "matchNumber": 91, "team1": "Ganador M76", "team2": "Ganador M78", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Octavos de final", "phase": "octavos", "matchNumber": 92, "team1": "Ganador M79", "team2": "Ganador M80", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Octavos de final", "phase": "octavos", "matchNumber": 93, "team1": "Ganador M83", "team2": "Ganador M84", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Octavos de final", "phase": "octavos", "matchNumber": 94, "team1": "Ganador M81", "team2": "Ganador M82", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Octavos de final", "phase": "octavos", "matchNumber": 95, "team1": "Ganador M86", "team2": "Ganador M88", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Octavos de final", "phase": "octavos", "matchNumber": 96, "team1": "Ganador M85", "team2": "Ganador M87", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Cuartos de final", "phase": "cuartos", "matchNumber": 97, "team1": "Ganador M89", "team2": "Ganador M90", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Cuartos de final", "phase": "cuartos", "matchNumber": 98, "team1": "Ganador M93", "team2": "Ganador M94", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Cuartos de final", "phase": "cuartos", "matchNumber": 99, "team1": "Ganador M91", "team2": "Ganador M92", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Cuartos de final", "phase": "cuartos", "matchNumber": 100, "team1": "Ganador M95", "team2": "Ganador M96", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Semifinales", "phase": "semis", "matchNumber": 101, "team1": "Ganador M97", "team2": "Ganador M98", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Semifinales", "phase": "semis", "matchNumber": 102, "team1": "Ganador M99", "team2": "Ganador M100", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Partido por 3er puesto", "phase": "tercer-puesto", "matchNumber": 103, "team1": "Perdedor M101", "team2": "Perdedor M102", "predictions": {}, "prodePending": true, "placeholder": true}, {"group": "Final", "phase": "final", "matchNumber": 104, "team1": "Ganador M101", "team2": "Ganador M102", "predictions": {}, "prodePending": true, "placeholder": true}];
+    const KNOCKOUT_FIXTURE_SCHEDULE = [{"date": "2026-06-28T12:00:00Z", "venue": "Los Angeles Stadium", "timeTbd": true, "matchNumber": 73}, {"date": "2026-06-29T12:00:00Z", "venue": "Boston Stadium", "timeTbd": true, "matchNumber": 74}, {"date": "2026-06-29T12:00:00Z", "venue": "Estadio Monterrey", "timeTbd": true, "matchNumber": 75}, {"date": "2026-06-29T12:00:00Z", "venue": "Houston Stadium", "timeTbd": true, "matchNumber": 76}, {"date": "2026-06-30T12:00:00Z", "venue": "New York New Jersey Stadium", "timeTbd": true, "matchNumber": 77}, {"date": "2026-06-30T12:00:00Z", "venue": "Dallas Stadium", "timeTbd": true, "matchNumber": 78}, {"date": "2026-06-30T12:00:00Z", "venue": "Mexico City Stadium", "timeTbd": true, "matchNumber": 79}, {"date": "2026-07-01T12:00:00Z", "venue": "Atlanta Stadium", "timeTbd": true, "matchNumber": 80}, {"date": "2026-07-01T12:00:00Z", "venue": "San Francisco Bay Area Stadium", "timeTbd": true, "matchNumber": 81}, {"date": "2026-07-01T12:00:00Z", "venue": "Seattle Stadium", "timeTbd": true, "matchNumber": 82}, {"date": "2026-07-02T12:00:00Z", "venue": "Toronto Stadium", "timeTbd": true, "matchNumber": 83}, {"date": "2026-07-02T12:00:00Z", "venue": "Los Angeles Stadium", "timeTbd": true, "matchNumber": 84}, {"date": "2026-07-02T12:00:00Z", "venue": "BC Place Vancouver", "timeTbd": true, "matchNumber": 85}, {"date": "2026-07-03T12:00:00Z", "venue": "Miami Stadium", "timeTbd": true, "matchNumber": 86}, {"date": "2026-07-03T12:00:00Z", "venue": "Kansas City Stadium", "timeTbd": true, "matchNumber": 87}, {"date": "2026-07-03T12:00:00Z", "venue": "Dallas Stadium", "timeTbd": true, "matchNumber": 88}, {"date": "2026-07-04T12:00:00Z", "venue": "Philadelphia Stadium", "timeTbd": true, "matchNumber": 89}, {"date": "2026-07-04T12:00:00Z", "venue": "Houston Stadium", "timeTbd": true, "matchNumber": 90}, {"date": "2026-07-05T12:00:00Z", "venue": "New York New Jersey Stadium", "timeTbd": true, "matchNumber": 91}, {"date": "2026-07-05T12:00:00Z", "venue": "Mexico City Stadium", "timeTbd": true, "matchNumber": 92}, {"date": "2026-07-06T12:00:00Z", "venue": "Dallas Stadium", "timeTbd": true, "matchNumber": 93}, {"date": "2026-07-06T12:00:00Z", "venue": "Seattle Stadium", "timeTbd": true, "matchNumber": 94}, {"date": "2026-07-07T12:00:00Z", "venue": "Atlanta Stadium", "timeTbd": true, "matchNumber": 95}, {"date": "2026-07-07T12:00:00Z", "venue": "BC Place Vancouver", "timeTbd": true, "matchNumber": 96}, {"date": "2026-07-09T12:00:00Z", "venue": "Boston Stadium", "timeTbd": true, "matchNumber": 97}, {"date": "2026-07-10T12:00:00Z", "venue": "Los Angeles Stadium", "timeTbd": true, "matchNumber": 98}, {"date": "2026-07-11T12:00:00Z", "venue": "Miami Stadium", "timeTbd": true, "matchNumber": 99}, {"date": "2026-07-11T12:00:00Z", "venue": "Kansas City Stadium", "timeTbd": true, "matchNumber": 100}, {"date": "2026-07-14T12:00:00Z", "venue": "Dallas Stadium", "timeTbd": true, "matchNumber": 101}, {"date": "2026-07-15T12:00:00Z", "venue": "Atlanta Stadium", "timeTbd": true, "matchNumber": 102}, {"date": "2026-07-18T12:00:00Z", "venue": "Miami Stadium", "timeTbd": true, "matchNumber": 103}, {"date": "2026-07-19T12:00:00Z", "venue": "New York New Jersey Stadium", "timeTbd": true, "matchNumber": 104}];
+    PRODE_DATA.matches.push(...KNOCKOUT_MATCHES);
+    FIXTURE_SCHEDULE.push(...KNOCKOUT_FIXTURE_SCHEDULE);
+
+    const TOTAL_MATCHES = PRODE_DATA.matches.length;
+    const PHASE_ORDER = ['grupos', '16avos', 'octavos', 'cuartos', 'semis', 'tercer-puesto', 'final'];
+    const PHASE_LABELS = {
+      grupos: 'Fase de grupos',
+      '16avos': '16avos de final',
+      octavos: 'Octavos de final',
+      cuartos: 'Cuartos de final',
+      semis: 'Semifinales',
+      'tercer-puesto': '3er puesto',
+      final: 'Final'
+    };
+
 
     const APP_STATE = {
       activeTab: 'tabla',
@@ -706,10 +733,11 @@
       lastFetch: null,
       loading: false,
       selectedParticipant: null,
+      expandedStages: new Set(PHASE_ORDER),
       expandedGroups: new Set(PRODE_DATA.matches.map(m => m.group)),
       expandedSimGroups: new Set(PRODE_DATA.matches.map(m => m.group)),
       expandedMatches: new Set(),
-      filters: { status: 'all', group: 'all' },
+      filters: { status: 'all', group: 'all', phase: 'all' },
       curioDate: null,
       simulatedOverrides: {},
       prizePool: Number(localStorage.getItem(PRIZE_CACHE_KEY) || 0)
@@ -726,12 +754,12 @@
       bindGlobalEvents();
       hydrateCache();
       render();
-      fetchAllGroupStageResults(false);
+      fetchAllTournamentResults(false);
     }
 
     function bindGlobalEvents() {
       $$('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
-      $('#refreshBtn').addEventListener('click', () => fetchAllGroupStageResults(true));
+      $('#refreshBtn').addEventListener('click', () => fetchAllTournamentResults(true));
       $('#drawerOverlay').addEventListener('click', closeDrawer);
       document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeDrawer(); });
     }
@@ -786,7 +814,7 @@
       $('#refreshBtn').disabled = isLoading;
     }
 
-    async function fetchAllGroupStageResults(force = false) {
+    async function fetchAllTournamentResults(force = false) {
       const cachedFresh = APP_STATE.lastFetch && Date.now() - APP_STATE.lastFetch < CACHE_MAX_AGE;
       if (!force && cachedFresh) return;
       if (force) localStorage.removeItem(RESULT_CACHE_KEY);
@@ -794,7 +822,7 @@
       const nextResults = { ...APP_STATE.results };
       let matchedEvents = 0;
       try {
-        for (const dateStr of GROUP_DATES) {
+        for (const dateStr of TOURNAMENT_DATES) {
           const data = await fetchResultsForDate(dateStr);
           const events = Array.isArray(data.events) ? data.events : [];
           for (const event of events) {
@@ -808,7 +836,7 @@
         APP_STATE.results = nextResults;
         APP_STATE.lastFetch = Date.now();
         persistResults();
-        showToast(matchedEvents ? 'Resultados actualizados ✓' : 'Fixture confirmado cargado; ESPN todavía no devolvió resultados para estos partidos');
+        showToast(matchedEvents ? 'Resultados actualizados ✓' : 'Fixture cargado; ESPN todavía no devolvió resultados para estos partidos');
         render();
       } catch (error) {
         console.warn('Error al obtener resultados', error);
@@ -992,7 +1020,7 @@
             return 0;
           }
           if (!Array.isArray(pred)) {
-            noPrediction += 1;
+            if (isPredictionExpected(match)) noPrediction += 1;
             return 0;
           }
           const points = calculatePoints(pred, actual);
@@ -1023,6 +1051,8 @@
         score: null,
         date: fixture.date,
         venue: fixture.venue,
+        timeTbd: Boolean(fixture.timeTbd),
+        matchNumber: fixture.matchNumber || index + 1,
         state: 'pre',
         completed: false,
         description: 'Fixture confirmado',
@@ -1088,6 +1118,74 @@
       return bestKey.split('-').map(Number);
     }
 
+
+
+    function getMatchPhase(match) {
+      if (match?.phase) return match.phase;
+      return 'grupos';
+    }
+
+    function phaseLabel(matchOrPhase) {
+      const key = typeof matchOrPhase === 'string' ? matchOrPhase : getMatchPhase(matchOrPhase);
+      return PHASE_LABELS[key] || key || 'Sin fase';
+    }
+
+    function isPredictionExpected(match) {
+      return match?.prodePending !== true || hasAnyPrediction(match);
+    }
+
+    function hasAnyPrediction(match) {
+      return Object.values(match?.predictions || {}).some(pred => Array.isArray(pred));
+    }
+
+    function isSimulationRelevant(match) {
+      return isPredictionExpected(match) || hasAnyPrediction(match);
+    }
+
+    function matchNumberLabel(match) {
+      return match?.matchNumber ? `M${match.matchNumber}` : match?.group || '';
+    }
+
+    function pendingProdeText(match) {
+      if (hasAnyPrediction(match)) return 'Pendiente';
+      return isPredictionExpected(match) ? 'Pendiente' : 'Prodes a cargar';
+    }
+
+    function getGroupFilterOptions() {
+      const groups = new Set();
+      PRODE_DATA.matches.forEach((match, index) => {
+        if (APP_STATE.filters.phase !== 'all' && getMatchPhase(match) !== APP_STATE.filters.phase) return;
+        if (APP_STATE.filters.status === 'played' && !isPlayed(index)) return;
+        if (APP_STATE.filters.status === 'pending' && isPlayed(index)) return;
+        groups.add(match.group);
+      });
+      return Array.from(groups);
+    }
+
+    function describeGroupBlock(group, items) {
+      const first = items[0]?.match;
+      if (getMatchPhase(first) === 'grupos') {
+        return Array.from(new Set(PRODE_DATA.matches.filter(m => m.group === group).flatMap(m => [m.team1, m.team2]))).map(prettyTeam).join(' · ');
+      }
+      const loaded = items.filter(item => hasAnyPrediction(item.match)).length;
+      const dates = Array.from(new Set(items.map(item => getResultEntry(item.index)?.date).filter(Boolean).map(date => formatDateKeyLong(dateKeyArgentina(new Date(date))))));
+      const dateText = dates.length ? dates.join(' · ') : 'Fechas a confirmar';
+      const prodeText = loaded ? `${loaded}/${items.length} con prodes cargados` : 'prodes a cargar';
+      return `${dateText} · ${prodeText}`;
+    }
+
+    function formatKickoffEntry(entry) {
+      if (!entry?.date) return 'Horario a confirmar';
+      if (entry.timeTbd) return 'Horario a confirmar';
+      return formatKickoff(entry.date);
+    }
+
+    function formatDateTimeEntry(entry) {
+      if (!entry?.date) return 'A confirmar';
+      if (entry.timeTbd) return `${formatDateOnly(entry.date)} · horario a confirmar`;
+      return formatDateTime(entry.date);
+    }
+
     function render() {
       updateLastFetchLabel();
       if (APP_STATE.activeTab === 'tabla') renderTabla();
@@ -1105,14 +1203,14 @@
       app.innerHTML = `
         <section class="grid">
           <div class="stat-grid">
-            <div class="stat"><strong>${played}/72</strong><span>Partidos con resultado</span></div>
+            <div class="stat"><strong>${played}/${TOTAL_MATCHES}</strong><span>Partidos con resultado</span></div>
             <div class="stat"><strong>${leader ? leader.total : 0}</strong><span>Puntos del puntero</span></div>
             <div class="stat"><strong>${exactos}</strong><span>Exactos del grupo</span></div>
             <div class="stat"><strong>${PRODE_DATA.participants.length}</strong><span>Amigos jugando</span></div>
           </div>
           <article class="card pad">
             <div class="section-title">
-              <div><h2>Tabla general</h2><p>Tocá un nombre para ver partido por partido.</p></div>
+              <div><h2>Tabla general</h2><p>Tocá un nombre para ver partido por partido. Las eliminatorias sin prodes cargados quedan preparadas pero no cuentan como faltantes.</p></div>
               <span class="pill">${played ? 'En carrera' : 'Esperando el arranque'}</span>
             </div>
             <div class="leaderboard">
@@ -1228,11 +1326,11 @@
         <article class="match-card${liveClass}">
           <button class="match-toggle" type="button" data-match-index="${index}" aria-expanded="${expanded}">
             <div class="match-head">
-              <div><div class="team right">${prettyTeam(match.team1)}</div><div class="match-meta">${formatKickoff(entry?.date)}</div></div>
+              <div><div class="team right">${prettyTeam(match.team1)}</div><div class="match-meta">${formatKickoffEntry(entry)}</div></div>
               <div class="score-pill">${actual ? actual.join('-') : 'vs'}</div>
-              <div><div class="team">${prettyTeam(match.team2)}</div><div class="match-meta">${match.group}</div></div>
+              <div><div class="team">${prettyTeam(match.team2)}</div><div class="match-meta"><span class="phase-tag">${phaseLabel(match)}</span> · ${match.group}</div></div>
               ${statusBadge(entry)}
-              <span class="count-badge">${actual ? winners + '/' + PRODE_DATA.participants.length + ' acertaron' : statusText(entry)}</span>
+              <span class="count-badge">${actual ? winners + '/' + PRODE_DATA.participants.length + ' acertaron' : pendingProdeText(match)}</span>
             </div>
           </button>
           ${expanded ? `<div class="match-expanded">${renderPredictionTable(index, true)}</div>` : ''}
@@ -1240,7 +1338,7 @@
     }
 
     function renderNoToday(next) {
-      const detail = next ? `El próximo partido confirmado es el ${formatDateTime(next.entry.date)}: ${prettyTeam(next.match.team1)} vs ${prettyTeam(next.match.team2)}.` : 'No quedan partidos confirmados por delante en la fase de grupos.';
+      const detail = next ? `El próximo partido confirmado es el ${formatDateTimeEntry(next.entry)}: ${prettyTeam(next.match.team1)} vs ${prettyTeam(next.match.team2)}.` : 'No quedan partidos confirmados por delante en el torneo.';
       return `<div class="empty"><strong>No hay partidos hoy en el radar.</strong><p>${detail}</p></div>`;
     }
 
@@ -1251,29 +1349,44 @@
     }
 
     function renderPartidos() {
-      const groups = groupMatches();
+      const stages = groupMatches();
+      const groupOptions = getGroupFilterOptions();
+      const allSectionsExpanded = areAllPartidosSectionsExpanded(stages);
       app.innerHTML = `
         <section>
           <article class="card pad">
             <div class="section-title">
-              <div><h2>Partidos</h2><p>Fase de grupos completa. Todos los horarios están en hora Argentina.</p></div>
+              <div><h2>Partidos</h2><p>Fase de grupos y rondas eliminatorias. Las llaves nuevas quedan como cruces a confirmar hasta que se carguen equipos y prodes.</p></div>
+              <span class="pill">${TOTAL_MATCHES} partidos totales</span>
             </div>
             <div class="filterbar">
               <button class="filter-btn ${APP_STATE.filters.status === 'all' ? 'active' : ''}" data-filter-status="all" type="button">Todos</button>
               <button class="filter-btn ${APP_STATE.filters.status === 'played' ? 'active' : ''}" data-filter-status="played" type="button">Jugados</button>
               <button class="filter-btn ${APP_STATE.filters.status === 'pending' ? 'active' : ''}" data-filter-status="pending" type="button">Pendientes</button>
-              <select id="groupFilter" aria-label="Filtrar por grupo">
-                <option value="all">Todos los grupos</option>
-                ${Array.from(groups.keys()).map(g => `<option value="${g}" ${APP_STATE.filters.group === g ? 'selected' : ''}>${g}</option>`).join('')}
+              <button class="filter-btn" id="toggleGroupsBtn" type="button">${allSectionsExpanded ? '▾ Colapsar todos los grupos' : '▸ Desplegar todos los grupos'}</button>
+              <select id="phaseFilter" aria-label="Filtrar por fase">
+                <option value="all">Todas las fases</option>
+                ${PHASE_ORDER.map(phase => `<option value="${phase}" ${APP_STATE.filters.phase === phase ? 'selected' : ''}>${phaseLabel(phase)}</option>`).join('')}
+              </select>
+              <select id="groupFilter" aria-label="Filtrar por grupo o ronda">
+                <option value="all">Todos los grupos/rondas</option>
+                ${groupOptions.map(g => `<option value="${g}" ${APP_STATE.filters.group === g ? 'selected' : ''}>${g}</option>`).join('')}
               </select>
             </div>
             <div id="groupsWrap">
-              ${Array.from(groups.entries()).map(([group, items]) => renderGroupBlock(group, items)).join('')}
+              ${stages.size ? renderPartidosStages(stages) : '<div class="empty"><strong>No hay partidos para estos filtros.</strong><p>Probá cambiando fase, grupo o estado.</p></div>'}
             </div>
           </article>
         </section>`;
-      $$('.filter-btn', app).forEach(btn => btn.addEventListener('click', () => { APP_STATE.filters.status = btn.dataset.filterStatus; renderPartidos(); }));
+      $$('.filter-btn[data-filter-status]', app).forEach(btn => btn.addEventListener('click', () => { APP_STATE.filters.status = btn.dataset.filterStatus; renderPartidos(); }));
+      $('#toggleGroupsBtn')?.addEventListener('click', () => { setAllPartidosSectionsExpanded(stages, !allSectionsExpanded); renderPartidos(); });
+      $('#phaseFilter').addEventListener('change', event => { APP_STATE.filters.phase = event.target.value; APP_STATE.filters.group = 'all'; renderPartidos(); });
       $('#groupFilter').addEventListener('change', event => { APP_STATE.filters.group = event.target.value; renderPartidos(); });
+      $$('.stage-header', app).forEach(btn => btn.addEventListener('click', () => {
+        const stage = btn.dataset.stage;
+        if (APP_STATE.expandedStages.has(stage)) APP_STATE.expandedStages.delete(stage); else APP_STATE.expandedStages.add(stage);
+        renderPartidos();
+      }));
       $$('.group-header', app).forEach(btn => btn.addEventListener('click', () => {
         const group = btn.dataset.group;
         if (APP_STATE.expandedGroups.has(group)) APP_STATE.expandedGroups.delete(group); else APP_STATE.expandedGroups.add(group);
@@ -1289,22 +1402,70 @@
     function groupMatches() {
       const grouped = new Map();
       PRODE_DATA.matches.forEach((match, index) => {
+        const phase = getMatchPhase(match);
+        if (APP_STATE.filters.phase !== 'all' && APP_STATE.filters.phase !== phase) return;
         if (APP_STATE.filters.group !== 'all' && APP_STATE.filters.group !== match.group) return;
         if (APP_STATE.filters.status === 'played' && !isPlayed(index)) return;
         if (APP_STATE.filters.status === 'pending' && isPlayed(index)) return;
-        if (!grouped.has(match.group)) grouped.set(match.group, []);
-        grouped.get(match.group).push({ match, index });
+        if (!grouped.has(phase)) grouped.set(phase, new Map());
+        const phaseGroups = grouped.get(phase);
+        if (!phaseGroups.has(match.group)) phaseGroups.set(match.group, []);
+        phaseGroups.get(match.group).push({ match, index });
       });
       return grouped;
     }
 
-    function renderGroupBlock(group, items) {
+    function renderPartidosStages(stages) {
+      const sections = [];
+      if (stages.has('grupos')) sections.push(renderGroupsStage(stages.get('grupos')));
+      PHASE_ORDER.filter(phase => phase !== 'grupos').forEach(phase => {
+        if (!stages.has(phase)) return;
+        sections.push(Array.from(stages.get(phase).entries()).map(([group, items]) => renderGroupBlock(group, items)).join(''));
+      });
+      return sections.join('');
+    }
+
+    function renderGroupsStage(groupMap) {
+      const collapsed = !APP_STATE.expandedStages.has('grupos');
+      const groupsCount = groupMap.size;
+      const matchesCount = Array.from(groupMap.values()).reduce((sum, items) => sum + items.length, 0);
+      const description = `${groupsCount} ${groupsCount === 1 ? 'grupo' : 'grupos'} · ${matchesCount} ${matchesCount === 1 ? 'partido' : 'partidos'}`;
+      return `
+        <section class="stage-block ${collapsed ? 'collapsed' : ''}">
+          <button class="stage-header" type="button" data-stage="grupos"><div><strong>GRUPOS</strong><br><span>${description}</span></div><span class="chev">⌄</span></button>
+          <div class="stage-content">${Array.from(groupMap.entries()).map(([group, items]) => renderGroupBlock(group, items, true)).join('')}</div>
+        </section>`;
+    }
+
+    function areAllPartidosSectionsExpanded(stages) {
+      if (!stages.size) return true;
+      for (const [phase, groupMap] of stages.entries()) {
+        if (phase === 'grupos' && !APP_STATE.expandedStages.has('grupos')) return false;
+        for (const group of groupMap.keys()) {
+          if (!APP_STATE.expandedGroups.has(group)) return false;
+        }
+      }
+      return true;
+    }
+
+    function setAllPartidosSectionsExpanded(stages, expand) {
+      for (const [phase, groupMap] of stages.entries()) {
+        if (phase === 'grupos') {
+          if (expand) APP_STATE.expandedStages.add('grupos'); else APP_STATE.expandedStages.delete('grupos');
+        }
+        for (const group of groupMap.keys()) {
+          if (expand) APP_STATE.expandedGroups.add(group); else APP_STATE.expandedGroups.delete(group);
+        }
+      }
+    }
+
+    function renderGroupBlock(group, items, isNested = false) {
       if (!items.length) return '';
       const collapsed = !APP_STATE.expandedGroups.has(group);
-      const teams = Array.from(new Set(PRODE_DATA.matches.filter(m => m.group === group).flatMap(m => [m.team1, m.team2]))).map(prettyTeam).join(' · ');
+      const description = describeGroupBlock(group, items);
       return `
-        <section class="group-block ${collapsed ? 'collapsed' : ''}">
-          <button class="group-header" type="button" data-group="${group}"><div><strong>${group.toUpperCase()}</strong><br><span>${teams}</span></div><span class="chev">⌄</span></button>
+        <section class="group-block ${isNested ? 'nested-group' : ''} ${collapsed ? 'collapsed' : ''}">
+          <button class="group-header" type="button" data-group="${group}"><div><strong>${group.toUpperCase()}</strong><br><span>${description}</span></div><span class="chev">⌄</span></button>
           <div class="group-content">${items.map(item => renderPartidoRow(item.match, item.index)).join('')}</div>
         </section>`;
     }
@@ -1318,11 +1479,11 @@
         <article class="match-card${isLiveEntry(entry) ? ' live-match' : ''}">
           <button class="match-toggle" type="button" data-match-index="${index}">
             <div class="match-head">
-              <div><div class="team right">${prettyTeam(match.team1)}</div><div class="match-meta">${entry?.date ? formatDateTime(entry.date) : 'Horario a confirmar'}</div></div>
+              <div><div class="team right">${prettyTeam(match.team1)}</div><div class="match-meta"><span class="match-id">${matchNumberLabel(match)}</span> · ${formatDateTimeEntry(entry)}</div></div>
               <div class="score-pill">${actual ? actual.join('-') : 'vs'}</div>
-              <div><div class="team">${prettyTeam(match.team2)}</div><div class="match-meta">${statusText(entry)}</div></div>
+              <div><div class="team">${prettyTeam(match.team2)}</div><div class="match-meta"><span class="phase-tag">${phaseLabel(match)}</span> · ${statusText(entry)}</div></div>
               ${statusBadge(entry)}
-              <span class="count-badge">${actual ? winners + '/' + PRODE_DATA.participants.length + ' acertaron' : 'Pendiente'}</span>
+              <span class="count-badge">${actual ? winners + '/' + PRODE_DATA.participants.length + ' acertaron' : pendingProdeText(match)}</span>
             </div>
           </button>
           ${expanded ? `<div class="match-expanded">${renderPredictionTable(index, true)}</div>` : ''}
@@ -1485,7 +1646,7 @@
       return `
         <article class="curio-match-card">
           <div class="curio-match-head">
-            <div><strong>${prettyTeam(match.team1)} vs ${prettyTeam(match.team2)}</strong><span>${match.group} · ${formatKickoff(entry?.date)}</span></div>
+            <div><strong>${prettyTeam(match.team1)} vs ${prettyTeam(match.team2)}</strong><span>${match.group} · ${formatKickoffEntry(entry)}</span></div>
             <div class="score-pill">${actual ? actual.join('-') : 'vs'}</div>
           </div>
           <div class="outcome-bars">
@@ -1579,20 +1740,21 @@
     }
 
     function renderSimulador() {
-      const remaining = PRODE_DATA.matches.map((match, index) => ({ match, index })).filter(item => !isPlayed(item.index));
+      const remaining = PRODE_DATA.matches.map((match, index) => ({ match, index })).filter(item => !isPlayed(item.index) && isSimulationRelevant(item.match));
       const grouped = groupSimulationMatches(remaining);
       const current = computeLeaderboard(APP_STATE.results);
       const simulated = computeLeaderboard(APP_STATE.simulatedOverrides, { useSimulationDefaults: true });
       const currentByName = Object.fromEntries(current.map(r => [r.name, r]));
       const simulatedCount = remaining.filter(item => Array.isArray(getSimulatedScore(item.index, APP_STATE.simulatedOverrides))).length;
+      const hiddenWithoutProdes = PRODE_DATA.matches.filter(match => !isPredictionExpected(match) && !hasAnyPrediction(match)).length;
       app.innerHTML = `
         <section class="sim-layout">
           <article class="card pad">
             <div class="section-title">
-              <div><h2>Simulador</h2><p>Los pendientes están agrupados por grupo. Abrí un grupo, cargá resultados y el ranking proyectado se recalcula al instante.</p></div>
+              <div><h2>Simulador</h2><p>Los pendientes con prodes cargados se agrupan por fase. Las eliminatorias sin prodes todavía no se computan.</p></div>
               <div class="header-actions"><button class="btn ghost" id="collapseSimGroups" type="button">Colapsar grupos</button><button class="btn ghost" id="clearSim" type="button">Limpiar simulación</button><button class="btn" id="realSim" type="button">Aplicar resultados reales</button></div>
             </div>
-            ${remaining.length ? `<div class="mini-note">${simulatedCount}/${remaining.length} partidos simulados y computados.</div><div class="sim-groups">${Array.from(grouped.entries()).map(([group, items]) => renderSimGroupBlock(group, items)).join('')}</div>` : '<div class="empty"><strong>Todos los partidos de grupos tienen resultado.</strong><p>No quedan escenarios para simular en esta fase.</p></div>'}
+            ${remaining.length ? `<div class="mini-note">${simulatedCount}/${remaining.length} partidos simulados y computados.${hiddenWithoutProdes ? ' ' + hiddenWithoutProdes + ' eliminatorias quedan ocultas hasta cargar prodes.' : ''}</div><div class="sim-groups">${Array.from(grouped.entries()).map(([group, items]) => renderSimGroupBlock(group, items)).join('')}</div>` : `<div class="empty"><strong>No hay partidos simulables.</strong><p>${hiddenWithoutProdes ? hiddenWithoutProdes + ' partidos eliminatorios están preparados, pero no se muestran hasta cargar prodes.' : 'Todos los partidos con prodes ya tienen resultado.'}</p></div>`}
           </article>
           <aside class="card pad sticky-side">
             <div class="section-title"><div><h3>Ranking proyectado</h3><p>Actual vs simulado</p></div></div>
@@ -1633,11 +1795,11 @@
       if (!items.length) return '';
       const collapsed = !APP_STATE.expandedSimGroups.has(group);
       const simulated = items.filter(item => Array.isArray(getSimulatedScore(item.index, APP_STATE.simulatedOverrides))).length;
-      const teams = Array.from(new Set(PRODE_DATA.matches.filter(m => m.group === group).flatMap(m => [m.team1, m.team2]))).map(prettyTeam).join(' · ');
+      const description = describeGroupBlock(group, items);
       return `
         <section class="group-block sim-group ${collapsed ? 'collapsed' : ''}">
           <button class="group-header sim-group-toggle" type="button" data-sim-group="${group}">
-            <div><strong>${group.toUpperCase()}</strong><br><span>${teams}</span></div>
+            <div><strong>${group.toUpperCase()}</strong><br><span>${description}</span></div>
             <span>${simulated}/${items.length} simulados <span class="chev">⌄</span></span>
           </button>
           <div class="group-content sim-group-content"><div class="sim-grid">${items.map(item => renderSimCard(item.match, item.index)).join('')}</div></div>
@@ -1649,7 +1811,7 @@
       const complete = Array.isArray(getSimulatedScore(index, APP_STATE.simulatedOverrides));
       return `
         <div class="sim-card ${complete ? 'complete' : 'pending'}">
-          <div class="match-meta">${match.group} · ${complete ? 'simulado y computado' : 'pendiente: no computa'}</div>
+          <div class="match-meta"><span class="phase-tag">${phaseLabel(match)}</span> · ${match.group} · ${complete ? 'simulado y computado' : 'pendiente: no computa'}</div>
           <div class="sim-teams"><div class="team right">${prettyTeam(match.team1)}</div><span class="score-pill">vs</span><div class="team">${prettyTeam(match.team2)}</div></div>
           <div class="sim-inputs">
             <label>${prettyTeam(match.team1)}<input class="sim-score" data-index="${index}" data-side="0" type="number" min="0" max="20" inputmode="numeric" placeholder="—" value="${score[0]}"></label>
@@ -1721,7 +1883,7 @@
       const actual = getResultScore(index);
       return `
         <div class="detail-row">
-          <div><strong>${prettyTeam(match.team1)} vs ${prettyTeam(match.team2)}</strong><small>${statusText(getResultEntry(index))}</small></div>
+          <div><strong>${prettyTeam(match.team1)} vs ${prettyTeam(match.team2)}</strong><small>${matchNumberLabel(match)} · ${phaseLabel(match)} · ${statusText(getResultEntry(index))}</small></div>
           <span>${formatPrediction(pred)}</span>
           <span>${formatScore(actual)}</span>
           <span class="point-chip p${points}">${actual ? points : '—'}</span>
@@ -1789,13 +1951,18 @@
 
     function formatScore(score) { return Array.isArray(score) ? score.join('-') : '—'; }
     function formatPrediction(score) { return Array.isArray(score) ? score.join('-') : '<span class="missing-prode">Sin prode</span>'; }
-    function countMissingPredictions(name) { return PRODE_DATA.matches.reduce((sum, match) => sum + (Array.isArray(match.predictions[name]) ? 0 : 1), 0); }
+    function countMissingPredictions(name) { return PRODE_DATA.matches.reduce((sum, match) => sum + (isPredictionExpected(match) && !Array.isArray(match.predictions[name]) ? 1 : 0), 0); }
     function dateKeyArgentina(date) {
       return new Intl.DateTimeFormat('en-CA', { timeZone: ARG_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date).replaceAll('-', '');
     }
     function formatKickoff(date) {
       return date ? new Intl.DateTimeFormat('es-AR', { timeZone: ARG_TIME_ZONE, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(date)) + ' hs' : 'Horario a confirmar';
     }
+    function formatDateOnly(date) {
+      if (!date) return 'A confirmar';
+      return new Intl.DateTimeFormat('es-AR', { timeZone: ARG_TIME_ZONE, day: '2-digit', month: 'short' }).format(new Date(date)).replace('.', '');
+    }
+
     function formatDateTime(date) {
       if (!date) return 'A confirmar';
       const d = new Date(date);
